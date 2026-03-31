@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — Inventory</title>
+<link rel="stylesheet" href="../css/global.css">
+<style>
+.inv-toolbar{padding:20px 36px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+.search-wrap{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px}
+.search-wrap svg{width:16px;height:16px;color:var(--text-muted);flex-shrink:0}
+.search-wrap input{background:none;border:none;color:var(--text);font-size:14px;width:100%}
+.search-wrap input::placeholder{color:var(--text-dim)}
+.filter-chip{padding:9px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:.2s;white-space:nowrap}
+.filter-chip:hover,.filter-chip.active{border-color:var(--border-hover);color:var(--acid)}
+.inv-body{padding:24px 36px;display:grid;grid-template-columns:1fr 280px;gap:24px}
+.inv-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.inv-table-head{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.inv-table-head h3{font-size:16px;font-weight:800}
+table{width:100%;border-collapse:collapse}
+thead tr{background:rgba(0,0,0,.2)}
+th{padding:10px 20px;text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);font-weight:700}
+td{padding:13px 20px;font-size:13px;border-top:1px solid var(--border);vertical-align:middle}
+.sku{font-family:var(--font-mono);font-size:11px;color:var(--text-dim)}
+.cat-chip{padding:3px 10px;background:var(--surface2);border-radius:20px;font-size:11px;font-weight:600;color:var(--text-muted)}
+.stock-bar-wrap{display:flex;align-items:center;gap:8px}
+.stock-bar{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;max-width:80px}
+.stock-bar-fill{height:100%;border-radius:3px;transition:width .4s}
+.stock-bar-fill.ok{background:var(--acid)}
+.stock-bar-fill.low{background:var(--orange)}
+.stock-bar-fill.critical{background:var(--red)}
+.stock-num{font-family:var(--font-mono);font-size:13px;min-width:28px}
+.stock-num.low{color:var(--orange)}
+.stock-num.critical{color:var(--red)}
+.right-panel{display:flex;flex-direction:column;gap:16px}
+.panel-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.panel-card h4{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px}
+.alert-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.alert-item:last-child{border-bottom:none}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.alert-item p{font-size:13px;font-weight:600;flex:1}
+.alert-item span{font-size:11px;color:var(--text-muted)}
+.restock-btn{font-size:11px;font-weight:700;color:var(--acid);cursor:pointer;white-space:nowrap}
+.restock-btn:hover{text-decoration:underline}
+.cat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.cat-row:last-child{border-bottom:none}
+.cat-row p{font-size:13px;font-weight:600}
+.cat-row span{font-size:13px;font-family:var(--font-mono);color:var(--text-muted)}
+.tr-hover:hover{background:rgba(183,253,80,.03)}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div style="width:36px;height:36px;background:var(--acid);border-radius:9px;display:grid;place-items:center;margin-bottom:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#080C08" stroke-width="2.5" width="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div style="font-size:18px;font-weight:800">Koutix</div>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">Enterprise Edition</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+      <a href="analytics.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analytics</a>
+      <a href="chain.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Branches</a>
+      <a href="inventory.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Inventory</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l-1.41 1.41M20.49 12H22M2 12H3.51M19.07 19.07l-1.41-1.41M4.93 4.93 3.52 3.52M12 20.49V22M12 2v1.51"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="login.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-eyebrow">Real-time</div>
+        <h1>Inventory</h1>
+        <p>Live stock tracking across all product categories. Auto-alerts on low stock.</p>
+      </div>
+      <button class="btn btn-acid" onclick="Toast.success('Export started — check your email')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+    <!-- TOOLBAR -->
+    <div class="inv-toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search products, SKU, category…" id="inv-search" oninput="filterInv(this.value)">
+      </div>
+      <div class="filter-chip active" onclick="setFilter('all',this)">All</div>
+      <div class="filter-chip" onclick="setFilter('low',this)">⚠ Low Stock</div>
+      <div class="filter-chip" onclick="setFilter('critical',this)">🔴 Critical</div>
+      <div class="filter-chip" onclick="setFilter('ok',this)">✓ In Stock</div>
+    </div>
+    <!-- BODY -->
+    <div class="inv-body">
+      <div class="inv-table-wrap">
+        <div class="inv-table-head">
+          <h3>Products — <span id="inv-branch-name">London Flagship</span></h3>
+          <button class="btn btn-ghost" style="padding:8px 14px;font-size:12px" onclick="refreshInv()">↻ Refresh</button>
+        </div>
+        <table>
+          <thead><tr><th>Product</th><th>SKU</th><th>Category</th><th>Stock</th><th>Price</th><th>Action</th></tr></thead>
+          <tbody id="inv-tbody"><tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+        <div class="panel-card">
+          <h4>Stock Alerts</h4>
+          <div id="alerts-list"><div style="color:var(--text-muted);font-size:13px">Loading…</div></div>
+        </div>
+        <div class="panel-card">
+          <h4>By Category</h4>
+          <div id="cat-breakdown"></div>
+        </div>
+        <div class="panel-card" style="background:rgba(183,253,80,.06);border-color:rgba(183,253,80,.2)">
+          <h4 style="color:var(--acid)">Auto-Restock</h4>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:14px">Enable AI-powered restocking. We'll place supplier orders automatically when stock hits reorder level.</p>
+          <button class="btn btn-acid" style="width:100%;justify-content:center;font-size:13px" onclick="Toast.info('Auto-restock enabled for this branch!')">Enable Auto-Restock</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- EDIT STOCK MODAL -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:500;place-items:center" onclick="if(event.target===this)closeEdit()">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;width:380px;display:grid">
+    <h3 style="font-size:20px;font-weight:800;margin-bottom:20px">Update Stock</h3>
+    <div style="font-size:14px;color:var(--text-muted);margin-bottom:6px" id="edit-product-name"></div>
+    <label class="input-label" style="margin-top:16px">New Quantity</label>
+    <input type="number" class="input-field" id="edit-qty" min="0" style="margin-bottom:20px">
+    <div style="display:flex;gap:12px">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeEdit()">Cancel</button>
+      <button class="btn btn-acid" id="edit-save-btn" style="flex:1;justify-content:center" onclick="saveStock()">Save</button>
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>
+let allItems = [], currentFilter = 'all', editingId = null;
+const BRANCH_ID = 'b1';
+function stockClass(item) {
+  const pct = item.stock / item.reorder_level;
+  if (item.stock <= 5) return 'critical';
+  if (pct <= 1) return 'low';
+  return 'ok';
+}
+async function loadInv() {
+  try {
+    allItems = await Backend.request('GET', `/api/branches/${BRANCH_ID}/inventory`);
+    render(); buildSidebar();
+  } catch(e) { document.getElementById('inv-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--red)">Failed to load inventory.</td></tr>'; }
+}
+function render() {
+  let list = [...allItems];
+  const q = document.getElementById('inv-search').value.toLowerCase();
+  if (q) list = list.filter(i => i.name.toLowerCase().includes(q) || i.sku.toLowerCase().includes(q) || i.category.toLowerCase().includes(q));
+  if (currentFilter !== 'all') list = list.filter(i => stockClass(i) === currentFilter);
+  const tbody = document.getElementById('inv-tbody');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">No items match.</td></tr>'; return; }
+  tbody.innerHTML = list.map(i => {
+    const sc = stockClass(i);
+    const pct = Math.min(100, Math.round(i.stock / (i.reorder_level * 2) * 100));
+    return `<tr class="tr-hover">
+      <td style="font-weight:700">${i.name}</td>
+      <td><span class="sku">${i.sku}</span></td>
+      <td><span class="cat-chip">${i.category}</span></td>
+      <td>
+        <div class="stock-bar-wrap">
+          <div class="stock-bar"><div class="stock-bar-fill ${sc}" style="width:${pct}%"></div></div>
+          <span class="stock-num ${sc !== 'ok' ? sc : ''}">${i.stock}</span>
+        </div>
+      </td>
+      <td style="font-family:var(--font-mono)">$${i.price.toFixed(2)}</td>
+      <td><button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="openEdit('${i.id}','${i.name}',${i.stock})">Edit</button></td>
+    </tr>`;
+  }).join('');
+}
+function buildSidebar() {
+  const alerts = allItems.filter(i => stockClass(i) !== 'ok');
+  const al = document.getElementById('alerts-list');
+  al.innerHTML = alerts.length ? alerts.map(i => {
+    const sc = stockClass(i);
+    return `<div class="alert-item"><div class="alert-dot" style="background:${sc==='critical'?'var(--red)':'var(--orange)'}"></div><p>${i.name}</p><span>${i.stock} left</span><span class="restock-btn" onclick="Toast.success('Restock order placed for ${i.name}')">Restock</span></div>`;
+  }).join('') : '<p style="font-size:13px;color:var(--text-muted)">✓ All items well stocked</p>';
+  const cats = {};
+  allItems.forEach(i => { cats[i.category] = (cats[i.category]||0) + 1; });
+  document.getElementById('cat-breakdown').innerHTML = Object.entries(cats).map(([k,v]) => `<div class="cat-row"><p>${k}</p><span>${v} items</span></div>`).join('');
+}
+function filterInv(q) { render(); }
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active'); render();
+}
+function refreshInv() { Toast.info('Syncing inventory…'); loadInv(); }
+function openEdit(id, name, stock) {
+  editingId = id;
+  document.getElementById('edit-product-name').textContent = name;
+  document.getElementById('edit-qty').value = stock;
+  document.getElementById('edit-modal').style.display = 'grid';
+}
+function closeEdit() { document.getElementById('edit-modal').style.display = 'none'; editingId = null; }
+async function saveStock() {
+  const qty = parseInt(document.getElementById('edit-qty').value);
+  if (isNaN(qty) || qty < 0) { Toast.error('Enter a valid quantity'); return; }
+  const btn = document.getElementById('edit-save-btn');
+  Loader.show(btn);
+  try {
+    await Backend.request('PATCH', `/api/inventory/${editingId}`, { quantity: qty });
+    const item = allItems.find(i => i.id === editingId);
+    if (item) { item.stock = qty; item.low_stock = qty <= item.reorder_level; }
+    render(); buildSidebar(); closeEdit(); Toast.success('Stock updated!');
+  } catch(e) { Toast.error('Failed to update.'); }
+  Loader.hide(btn);
+}
+loadInv();
+</script>
+</body>
+</html>

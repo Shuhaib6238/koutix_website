@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — Configuration</title>
+<link rel="stylesheet" href="../css/global.css">
+<style>
+body { background: var(--black); color: #fff; min-height: 100vh; display: flex; }
+
+.cfg-aside { 
+    width: 420px; 
+    background: rgba(10,10,10,0.9);
+    backdrop-filter: blur(40px);
+    border-right: 1px solid var(--border);
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+.cfg-aside::before {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(163,255,18,0.05), transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+.aside-step { 
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600; color: var(--acid); 
+    letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 16px; 
+}
+.aside-title { 
+    font-family: var(--font-display); 
+    font-size: clamp(40px, 5vw, 56px); 
+    font-weight: 900;
+    line-height: 0.92; 
+    letter-spacing: -0.03em;
+    margin: 0 0 24px; 
+}
+.aside-desc { font-size: 15px; color: var(--text-muted); line-height: 1.7; }
+
+.cfg-main { flex: 1; padding: 60px 80px; overflow-y: auto; }
+.cfg-section { max-width: 640px; margin-bottom: 48px; }
+.section-head { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+.section-head .icon { 
+    width: 44px; height: 44px; 
+    background: rgba(163,255,18,0.08); 
+    border: 1px solid rgba(163,255,18,0.12);
+    border-radius: 12px; display: grid; place-items: center; color: var(--acid); 
+}
+.section-head h2 { font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin: 0; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.span-2 { grid-column: span 2; }
+
+.field-group { margin-bottom: 20px; }
+.field-label { 
+    display: block; font-size: 11px; font-weight: 700; 
+    text-transform: uppercase; letter-spacing: 0.12em; 
+    color: var(--text-muted); margin-bottom: 10px; 
+}
+.input-wrap input, .input-wrap select {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: #fff;
+    font-size: 14px;
+    font-family: var(--font-body);
+    transition: all 0.3s;
+}
+.input-wrap input::placeholder { color: var(--text-dim); }
+.input-wrap input:focus { 
+    border-color: var(--acid); outline: none; 
+    background: rgba(163,255,18,0.02); 
+    box-shadow: 0 0 0 3px rgba(163,255,18,0.06);
+}
+
+.plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 8px; }
+.plan-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 24px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+}
+.plan-card:hover { border-color: rgba(255,255,255,0.15); }
+.plan-card.selected { 
+    border-color: var(--acid); 
+    background: rgba(163,255,18,0.04); 
+    box-shadow: 0 0 30px rgba(163,255,18,0.06);
+}
+.plan-name { 
+    display: block; font-size: 10px; font-weight: 700; 
+    text-transform: uppercase; letter-spacing: 0.12em; 
+    color: var(--text-muted); margin-bottom: 6px; 
+}
+.plan-card.selected .plan-name { color: var(--acid); }
+.plan-price { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; }
+.plan-price small { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+
+.cfg-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+    max-width: 640px;
+}
+
+@media (max-width: 900px) {
+    .cfg-aside { display: none; }
+    .cfg-main { padding: 40px 24px; }
+    .plan-grid { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .span-2 { grid-column: span 1; }
+}
+</style>
+</head>
+<body>
+<div class="cfg-aside">
+    <div class="aside-step">Phase 02 / 02</div>
+    <h1 class="aside-title">Define<br>Your<br>Kinetic<br>DNA.</h1>
+    <p class="aside-desc" id="arch-desc">Configuring your enterprise network for multi-point retail kinetics.</p>
+</div>
+
+<main class="cfg-main">
+    <div class="cfg-section">
+        <div class="section-head">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg></div>
+            <h2 id="section-title">Identity Provisioning</h2>
+        </div>
+        <div class="form-grid" id="dynamic-form"></div>
+    </div>
+
+    <div class="cfg-section">
+        <div class="section-head">
+            <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            <h2>Service Tier</h2>
+        </div>
+        <div class="plan-grid">
+            <div class="plan-card" onclick="selectPlan('basic', this)">
+                <span class="plan-name">Basic</span>
+                <span class="plan-price">$49<small>/mo</small></span>
+            </div>
+            <div class="plan-card selected" onclick="selectPlan('standard', this)">
+                <span class="plan-name">Standard</span>
+                <span class="plan-price">$149<small>/mo</small></span>
+            </div>
+            <div class="plan-card" onclick="selectPlan('pro', this)">
+                <span class="plan-name">Enterprise</span>
+                <span class="plan-price">$499<small>/mo</small></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="cfg-footer">
+        <a href="onboarding.html" class="btn btn-ghost">Back</a>
+        <button id="finish-btn" class="btn btn-acid" style="padding: 16px 40px;" onclick="provision()">
+            Finalize Deployment →
+        </button>
+    </div>
+</main>
+
+<script src="../js/app.js"></script>
+<script>
+const arch = sessionStorage.getItem('koutix_arch') || 'store';
+const form = document.getElementById('dynamic-form');
+let selectedPlan = 'standard';
+
+if (arch === 'chain') {
+    document.getElementById('arch-desc').textContent = 'Configuring your enterprise network for multi-point retail kinetics.';
+    document.getElementById('section-title').textContent = 'Chain Identity';
+} else {
+    document.getElementById('arch-desc').textContent = 'Focused deployment for individual retail locations requiring frictionless identity tracking.';
+    document.getElementById('section-title').textContent = 'Store Identity';
+}
+
+const fields = arch === 'chain' ? [
+    { id: 'businessName', label: 'Business Name', placeholder: 'Nexus Retail Group', span: 2 },
+    { id: 'phone', label: 'Contact Phone', placeholder: '+1 (555) 000-0000' },
+    { id: 'email', label: 'Admin Email', placeholder: 'admin@nexus.io' },
+    { id: 'password', label: 'Security Key', placeholder: '••••••••', type: 'password', span: 2 }
+] : [
+    { id: 'storeName', label: 'Store Name', placeholder: 'Koutix Downtown' },
+    { id: 'name', label: 'Manager Name', placeholder: 'John Sterling' },
+    { id: 'phone', label: 'Contact Phone', placeholder: '+1 (555) 000-0000' },
+    { id: 'email', label: 'Manager Email', placeholder: 'john@koutix.io' },
+    { id: 'storeAddress', label: 'Physical Address', placeholder: '123 Kinetic Way, Suite 10', span: 2 },
+    { id: 'password', label: 'Security Key', placeholder: '••••••••', type: 'password', span: 2 }
+];
+
+fields.forEach(f => {
+    const div = document.createElement('div');
+    if (f.span) div.className = `span-${f.span}`;
+    div.innerHTML = `
+        <div class="field-group">
+            <label class="field-label">${f.label}</label>
+            <div class="input-wrap">
+                <input type="${f.type || 'text'}" id="${f.id}" placeholder="${f.placeholder}">
+            </div>
+        </div>
+    `;
+    form.appendChild(div);
+});
+
+function selectPlan(p, el) {
+    selectedPlan = p;
+    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+async function provision() {
+    const btn = document.getElementById('finish-btn');
+    const data = { plan: selectedPlan };
+    let missing = false;
+
+    fields.forEach(f => {
+        const val = document.getElementById(f.id).value.trim();
+        if (!val) missing = true;
+        data[f.id] = val;
+    });
+
+    if (missing) {
+        Toast.error('Please complete all identification fields');
+        return;
+    }
+
+    Loader.show(btn);
+    try {
+        const method = arch === 'chain' ? 'registerChain' : 'registerStore';
+        const res = await Backend[method](data);
+        
+        Toast.success('Deployment Initiated. Redirecting to payment...');
+        
+        if (res.data && res.data.checkoutUrl) {
+            setTimeout(() => {
+                window.location.href = res.data.checkoutUrl;
+            }, 1500);
+        } else {
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+        }
+    } catch (e) {
+        console.error(e);
+        Toast.error(e.message || 'Provisioning failed. Please verify credentials.');
+        Loader.hide(btn);
+    }
+}
+</script>
+</body>
+</html>

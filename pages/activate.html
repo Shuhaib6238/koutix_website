@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — Branch Manager Activation</title>
+<link rel="stylesheet" href="../css/global.css">
+<!-- Firebase SDK (Compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<style>
+body {
+    display: flex;
+    min-height: 100vh;
+    background: var(--black);
+}
+
+/* ── LEFT BRANDING ── */
+.act-left {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+.act-left::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(163,255,18,0.06), transparent 65%);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+}
+.act-left-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+.act-icon-box {
+    width: 80px; height: 80px;
+    background: var(--acid);
+    border-radius: 22px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 28px;
+    box-shadow: 0 0 40px rgba(163,255,18,0.25);
+}
+.act-icon-box svg { width: 40px; height: 40px; color: var(--black); }
+.act-left-title {
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+}
+.act-left-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 320px;
+    line-height: 1.7;
+}
+
+/* ── RIGHT FORM ── */
+.act-right {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 64px;
+    position: relative;
+}
+.act-right::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 1px; height: 100%;
+    background: linear-gradient(180deg, transparent, var(--border), var(--border), transparent);
+}
+
+.act-form-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    backdrop-filter: blur(20px);
+    max-width: 440px;
+}
+
+.act-form-title {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+}
+.act-form-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    letter-spacing: 0.04em;
+}
+
+.form-field { margin-bottom: 22px; }
+.field-label { 
+    display: block; font-size: 11px; font-weight: 700; 
+    text-transform: uppercase; letter-spacing: 0.15em; 
+    color: var(--text-muted); margin-bottom: 10px; 
+}
+.input-wrap input {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 15px 18px;
+    color: #fff;
+    font-size: 15px;
+    font-family: var(--font-body);
+    transition: all 0.3s;
+}
+.input-wrap input::placeholder { color: var(--text-dim); }
+.input-wrap input:focus {
+    border-color: var(--acid);
+    background: rgba(163,255,18,0.02);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(163,255,18,0.06);
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--acid);
+    color: var(--black);
+    border: none;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 14px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+    margin-top: 8px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 0 24px rgba(163,255,18,0.2);
+}
+.auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(163,255,18,0.35);
+    background: #b8ff3a;
+}
+.auth-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.sys-tag {
+    position: fixed;
+    bottom: 24px; right: 32px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.12);
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    .act-left { display: none; }
+    .act-right { width: 100%; padding: 40px 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="act-left">
+    <div class="act-left-content">
+        <div class="act-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+        </div>
+        <h1 class="act-left-title">Branch<br>Activation</h1>
+        <p class="act-left-sub">Complete your profile to activate your branch manager account and begin operations.</p>
+    </div>
+</div>
+
+<div class="act-right">
+    <div class="act-form-card">
+        <h2 class="act-form-title">Activate Your Account</h2>
+        <p class="act-form-sub" id="act-tagline">COMPLETE YOUR BRANCH MANAGER PROFILE</p>
+
+        <div class="form-field">
+            <label class="field-label">Full Name</label>
+            <div class="input-wrap">
+                <input type="text" id="name" placeholder="John Doe">
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label class="field-label">Contact Phone</label>
+            <div class="input-wrap">
+                <input type="tel" id="phone" placeholder="+44 123 456 7890">
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label class="field-label">Choose A Secure Password</label>
+            <div class="input-wrap">
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+        </div>
+
+        <button id="activate-btn" class="auth-btn">
+            Activate My Account
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<div class="sys-tag">KX-CORE-V2 // PROTOCOL ACTIVE</div>
+
+<script src="../js/app.js"></script>
+<script>
+const btn = document.getElementById('activate-btn');
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get('token');
+
+if (!token) {
+    Toast.error('Invalid link! No activation token found.');
+    btn.disabled = true;
+    document.getElementById('act-tagline').innerText = 'ERROR: MISSING ACTIVATION TOKEN';
+    document.getElementById('act-tagline').style.color = '#ff4d4f';
+}
+
+btn.addEventListener('click', async () => {
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const pass = document.getElementById('password').value;
+    
+    if (!name || !pass) {
+        Toast.error('Name and password are required');
+        return;
+    }
+
+    Loader.show(btn);
+    try {
+        const payload = {
+            token: token,
+            password: pass,
+            name: name,
+            phone: phone
+        };
+        
+        await Backend.activateBranch(payload);
+        Toast.success('Account Activated successfully! You can now log in.');
+        
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 2000);
+    } catch (e) {
+        console.error(e);
+        Toast.error(e.message || 'Activation failed');
+        Loader.hide(btn);
+    }
+});
+
+document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') btn.click();
+});
+</script>
+</body>
+</html>

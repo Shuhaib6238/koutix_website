@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — Analytics</title>
+<link rel="stylesheet" href="../css/global.css">
+<style>
+.analytics-body{padding:28px 36px;display:flex;flex-direction:column;gap:24px}
+.period-tabs{display:flex;gap:6px}
+.ptab{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;border:1px solid var(--border);color:var(--text-muted)}
+.ptab.active{background:rgba(183,253,80,.12);border-color:var(--acid);color:var(--acid)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.kc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:all .2s}
+.kc:hover{border-color:var(--border-hover)}
+.kc-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+.kc-val{font-family:var(--font-display);font-size:36px;line-height:1;margin-bottom:6px}
+.kc-trend{font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px}
+.trend-up{color:var(--acid)}.trend-down{color:var(--red)}
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+.chart-title{font-size:18px;font-weight:800;margin-bottom:4px}
+.chart-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px}
+.bar-area{display:flex;align-items:flex-end;gap:10px;height:160px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.bar-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.bar-body{width:100%;border-radius:4px 4px 0 0;background:var(--acid);transition:height .6s cubic-bezier(.4,0,.2,1);opacity:.85}
+.bar-body:hover{opacity:1}
+.bar-day{font-size:10px;color:var(--text-dim);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:6px}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;position:relative}
+.donut-wrap svg{width:160px;height:160px}
+.donut-center{position:absolute;text-align:center}
+.donut-center .dval{font-family:var(--font-display);font-size:28px;line-height:1}
+.donut-center .dlabel{font-size:11px;color:var(--text-muted)}
+.donut-legend{display:flex;flex-direction:column;gap:10px;margin-top:16px;width:100%}
+.dl-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.dl-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.dl-name{flex:1;color:var(--text-muted)}
+.dl-val{font-family:var(--font-mono);font-size:12px}
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.top-table{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.top-table-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.top-table-head h3{font-size:16px;font-weight:800}
+.row-item{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border)}
+.row-item:last-child{border-bottom:none}
+.row-rank{width:24px;height:24px;background:var(--surface2);border-radius:6px;display:grid;place-items:center;font-size:11px;font-weight:800;font-family:var(--font-mono);flex-shrink:0;color:var(--text-muted)}
+.row-rank.top{background:rgba(183,253,80,.15);color:var(--acid)}
+.row-label{flex:1;font-size:13px;font-weight:600}
+.row-bar-wrap{display:flex;align-items:center;gap:8px}
+.row-bar{height:4px;background:var(--acid);border-radius:2px}
+.row-val{font-size:12px;font-family:var(--font-mono);color:var(--text-muted);min-width:50px;text-align:right}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div style="width:36px;height:36px;background:var(--acid);border-radius:9px;display:grid;place-items:center;margin-bottom:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#080C08" stroke-width="2.5" width="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div style="font-size:18px;font-weight:800">Koutix</div>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">Enterprise Edition</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+      <a href="analytics.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analytics</a>
+      <a href="chain.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Branches</a>
+      <a href="inventory.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Inventory</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="login.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</a>
+    </div>
+  </aside>
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-eyebrow">Intelligence</div>
+        <h1>Analytics</h1>
+        <p>Revenue trends, order patterns, and customer insights for Downtown Hub 04.</p>
+      </div>
+      <div class="period-tabs">
+        <div class="ptab active" onclick="setPeriod('7d',this)">7D</div>
+        <div class="ptab" onclick="setPeriod('30d',this)">30D</div>
+        <div class="ptab" onclick="setPeriod('90d',this)">90D</div>
+        <div class="ptab" onclick="setPeriod('1y',this)">1Y</div>
+      </div>
+    </div>
+    <div class="analytics-body">
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kc"><div class="kc-label">Total Revenue</div><div class="kc-val" id="a-rev">—</div><div class="kc-trend trend-up" id="a-rev-t"></div></div>
+        <div class="kc"><div class="kc-label">Total Orders</div><div class="kc-val" id="a-orders">—</div><div class="kc-trend trend-up">↑ 8.2% vs prior</div></div>
+        <div class="kc"><div class="kc-label">Avg Order Value</div><div class="kc-val" id="a-aov">—</div><div class="kc-trend trend-up">↑ 3.7%</div></div>
+        <div class="kc"><div class="kc-label">Avg Prep Time</div><div class="kc-val" id="a-prep">—</div><div class="kc-trend trend-down" id="a-prep-t"></div></div>
+      </div>
+      <!-- CHARTS -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-title">Daily Revenue</div>
+          <div class="chart-sub">Last 7 days — Downtown Hub 04</div>
+          <div class="bar-area" id="rev-bars"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Orders by Status</div>
+          <div class="chart-sub">This week</div>
+          <div class="donut-wrap">
+            <svg viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r="60" fill="none" stroke="var(--surface2)" stroke-width="20"/>
+              <circle cx="80" cy="80" r="60" fill="none" stroke="var(--acid)" stroke-width="20"
+                stroke-dasharray="226 151" stroke-dashoffset="56" transform="rotate(-90 80 80)" id="donut-1"/>
+              <circle cx="80" cy="80" r="60" fill="none" stroke="var(--orange)" stroke-width="20"
+                stroke-dasharray="75 302" stroke-dashoffset="-170" transform="rotate(-90 80 80)" id="donut-2"/>
+              <circle cx="80" cy="80" r="60" fill="none" stroke="var(--red)" stroke-width="20"
+                stroke-dasharray="50 327" stroke-dashoffset="-245" transform="rotate(-90 80 80)" id="donut-3"/>
+            </svg>
+            <div class="donut-center"><div class="dval">284</div><div class="dlabel">Total</div></div>
+          </div>
+          <div class="donut-legend">
+            <div class="dl-item"><div class="dl-dot" style="background:var(--acid)"></div><span class="dl-name">Completed</span><span class="dl-val">200</span></div>
+            <div class="dl-item"><div class="dl-dot" style="background:var(--orange)"></div><span class="dl-name">In Progress</span><span class="dl-val">56</span></div>
+            <div class="dl-item"><div class="dl-dot" style="background:var(--red)"></div><span class="dl-name">Delayed</span><span class="dl-val">28</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- BOTTOM -->
+      <div class="bottom-row">
+        <div class="top-table">
+          <div class="top-table-head"><h3>Top Products</h3><span style="font-size:12px;color:var(--text-muted)">By revenue</span></div>
+          <div id="top-products">
+            <div class="row-item"><div class="row-rank top">1</div><span class="row-label">Organic Milk 2L</span><div class="row-bar-wrap"><div class="row-bar" style="width:120px"></div><span class="row-val">$842</span></div></div>
+            <div class="row-item"><div class="row-rank top">2</div><span class="row-label">Sourdough Bread</span><div class="row-bar-wrap"><div class="row-bar" style="width:95px"></div><span class="row-val">$631</span></div></div>
+            <div class="row-item"><div class="row-rank">3</div><span class="row-label">Free Range Eggs 12</span><div class="row-bar-wrap"><div class="row-bar" style="width:72px;opacity:.7"></div><span class="row-val">$479</span></div></div>
+            <div class="row-item"><div class="row-rank">4</div><span class="row-label">Sparkling Water 6pk</span><div class="row-bar-wrap"><div class="row-bar" style="width:55px;opacity:.5"></div><span class="row-val">$366</span></div></div>
+            <div class="row-item"><div class="row-rank">5</div><span class="row-label">Avocados x3</span><div class="row-bar-wrap"><div class="row-bar" style="width:38px;opacity:.4"></div><span class="row-val">$252</span></div></div>
+          </div>
+        </div>
+        <div class="top-table">
+          <div class="top-table-head"><h3>Peak Hours</h3><span style="font-size:12px;color:var(--text-muted)">Orders per hour</span></div>
+          <div>
+            <div class="row-item"><div class="row-rank top">1</div><span class="row-label">12:00 – 13:00</span><div class="row-bar-wrap"><div class="row-bar" style="width:110px"></div><span class="row-val">48 orders</span></div></div>
+            <div class="row-item"><div class="row-rank top">2</div><span class="row-label">18:00 – 19:00</span><div class="row-bar-wrap"><div class="row-bar" style="width:88px"></div><span class="row-val">38 orders</span></div></div>
+            <div class="row-item"><div class="row-rank">3</div><span class="row-label">09:00 – 10:00</span><div class="row-bar-wrap"><div class="row-bar" style="width:60px;opacity:.7"></div><span class="row-val">26 orders</span></div></div>
+            <div class="row-item"><div class="row-rank">4</div><span class="row-label">17:00 – 18:00</span><div class="row-bar-wrap"><div class="row-bar" style="width:48px;opacity:.5"></div><span class="row-val">21 orders</span></div></div>
+            <div class="row-item"><div class="row-rank">5</div><span class="row-label">13:00 – 14:00</span><div class="row-bar-wrap"><div class="row-bar" style="width:34px;opacity:.4"></div><span class="row-val">15 orders</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../js/app.js"></script>
+<script>
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Today'];
+async function loadAnalytics(period='7d') {
+  try {
+    const s = await Backend.request('GET', `/api/analytics/branches/b1?period=${period}`);
+    document.getElementById('a-rev').textContent = '$' + s.total_sales.toLocaleString();
+    document.getElementById('a-rev-t').textContent = '↑ ' + s.sales_change + '% vs prior period';
+    document.getElementById('a-orders').textContent = '284';
+    document.getElementById('a-aov').textContent = '$' + (s.total_sales/284).toFixed(0);
+    document.getElementById('a-prep').textContent = s.avg_prep_time + 'm';
+    document.getElementById('a-prep-t').textContent = '↑ +' + s.prep_change + 'm peak delay';
+    buildBars(s.daily_revenue);
+  } catch(e) {}
+}
+function buildBars(data) {
+  const max = Math.max(...data);
+  document.getElementById('rev-bars').innerHTML = data.map((v,i) => `
+    <div class="bar-item">
+      <div style="flex:1;display:flex;align-items:flex-end;width:100%">
+        <div class="bar-body" style="height:${Math.round(v/max*100)}%;min-height:6px" title="$${v.toLocaleString()}"></div>
+      </div>
+      <div class="bar-day">${DAYS[i]}</div>
+    </div>`).join('');
+}
+function setPeriod(p, el) {
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active'); loadAnalytics(p);
+}
+loadAnalytics();
+</script>
+</body>
+</html>

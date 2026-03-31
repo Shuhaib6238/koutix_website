@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — No Queue. No Cashier. Just Walk Out.</title>
+<meta name="description" content="Koutix transforms your supermarket into a frictionless, AI-powered shopping experience. No queues, no cashiers — customers just walk out.">
+<link rel="stylesheet" href="css/global.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Firebase SDK (Compat version for easier integration) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<style>
+/* ═══════════════════════════════════════════════════════
+   KOUTIX LANDING PAGE — Premium SaaS Redesign
+   ═══════════════════════════════════════════════════════ */
+
+/* ── LANDING OVERRIDES ──────────────────────────────── */
+.landing-page {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --acid: #A3FF12;
+  --acid-dim: #7acc00;
+  --acid-glow: rgba(163,255,18,0.15);
+  --acid-glow-strong: rgba(163,255,18,0.25);
+  --bg-primary: #050505;
+  --bg-secondary: #0a0a0a;
+  --bg-card: #0f0f0f;
+  --bg-card-hover: #141414;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-medium: rgba(255,255,255,0.1);
+  --text-primary: #f5f5f5;
+  --text-secondary: #a0a0a0;
+  --text-tertiary: #555;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+/* ── NAVBAR ────────────────────────────────────────── */
+.lp-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 60px;
+  background: rgba(5,5,5,0.6);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.lp-nav.scrolled {
+  padding: 14px 60px;
+  background: rgba(5,5,5,0.92);
+  border-bottom-color: var(--border-medium);
+}
+.lp-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+.lp-logo-mark {
+  width: 36px; height: 36px;
+  background: var(--acid);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 20px rgba(163,255,18,0.3);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.lp-nav-logo:hover .lp-logo-mark {
+  transform: rotate(-8deg) scale(1.05);
+  box-shadow: 0 0 30px rgba(163,255,18,0.5);
+}
+.lp-nav-links {
+  display: flex;
+  gap: 36px;
+}
+.lp-nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.25s;
+  position: relative;
+}
+.lp-nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 2px;
+  background: var(--acid);
+  transition: width 0.3s;
+  border-radius: 1px;
+}
+.lp-nav-links a:hover { color: var(--text-primary); }
+.lp-nav-links a:hover::after { width: 100%; }
+.lp-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  border: none;
+  text-decoration: none;
+}
+.lp-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
+}
+.lp-btn-ghost:hover {
+  color: var(--text-primary);
+  border-color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.04);
+}
+.lp-btn-primary {
+  background: var(--acid);
+  color: #050505;
+  font-weight: 700;
+  box-shadow: 0 0 20px rgba(163,255,18,0.2), 0 2px 8px rgba(0,0,0,0.3);
+}
+.lp-btn-primary:hover {
+  background: #b8ff3a;
+  box-shadow: 0 0 40px rgba(163,255,18,0.35), 0 4px 16px rgba(0,0,0,0.3);
+  transform: translateY(-2px);
+}
+.lp-btn-lg {
+  padding: 16px 32px;
+  font-size: 16px;
+  border-radius: 14px;
+}
+.lp-btn-dark {
+  background: var(--bg-primary);
+  color: var(--acid);
+  font-weight: 700;
+  border: 2px solid rgba(163,255,18,0.3);
+}
+.lp-btn-dark:hover {
+  background: #0a0a0a;
+  border-color: var(--acid);
+  box-shadow: 0 0 30px rgba(163,255,18,0.15);
+  transform: translateY(-2px);
+}
+
+/* ── HERO SECTION ──────────────────────────────────── */
+.lp-hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 140px 60px 100px;
+  position: relative;
+  overflow: hidden;
+}
+.lp-hero-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.lp-hero-ambient::before {
+  content: '';
+  position: absolute;
+  width: 900px; height: 900px;
+  background: radial-gradient(circle, rgba(163,255,18,0.06) 0%, transparent 65%);
+  top: -200px; right: -200px;
+  border-radius: 50%;
+}
+.lp-hero-ambient::after {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(163,255,18,0.03) 0%, transparent 70%);
+  bottom: 0; left: -100px;
+  border-radius: 50%;
+}
+.lp-hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 70% 70% at 75% 45%, black 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 75% 45%, black 0%, transparent 70%);
+}
+.lp-hero-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+.lp-hero-text { max-width: 620px; }
+.lp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  border: 1px solid rgba(163,255,18,0.2);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 32px;
+  background: rgba(163,255,18,0.04);
+}
+.lp-eyebrow-dot {
+  width: 7px; height: 7px;
+  background: var(--acid);
+  border-radius: 50%;
+  animation: lp-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(163,255,18,0.6);
+}
+@keyframes lp-pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.4); }
+}
+.lp-hero h1 {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(52px, 6vw, 80px);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-bottom: 28px;
+}
+.lp-hero h1 .lp-accent {
+  color: var(--acid);
+  text-shadow: 0 0 60px rgba(163,255,18,0.3);
+}
+.lp-hero-sub {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 480px;
+  margin-bottom: 40px;
+}
+.lp-hero-cta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.lp-hero-media {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.lp-hero-img-wrapper {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(163,255,18,0.12);
+  box-shadow:
+    0 0 80px rgba(163,255,18,0.08),
+    0 32px 64px rgba(0,0,0,0.5);
+}
+.lp-hero-img-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 24px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(163,255,18,0.3), transparent 50%, rgba(163,255,18,0.1));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  z-index: 1;
+}
+.lp-hero-img {
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  display: block;
+  border-radius: 24px;
+}
+.lp-hero-float-badge {
+  position: absolute;
+  bottom: -20px;
+  left: -30px;
+  background: rgba(15,15,15,0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(163,255,18,0.15);
+  border-radius: 16px;
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  z-index: 3;
+  animation: lp-float 4s ease-in-out infinite;
+}
+@keyframes lp-float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.lp-float-icon {
+  width: 42px; height: 42px;
+  background: rgba(163,255,18,0.12);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--acid);
+}
+.lp-float-text span {
+  display: block;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+.lp-float-text strong {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--acid);
+}
+
+/* ── TRUSTED BAR ────────────────────────────────────── */
+.lp-trust {
+  padding: 60px 60px;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: center;
+}
+.lp-trust-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 32px;
+}
+.lp-trust-logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+  opacity: 0.35;
+}
+.lp-trust-item {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+}
+
+/* ── SECTION COMMON ─────────────────────────────────── */
+.lp-section {
+  padding: 120px 60px;
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.lp-section-full {
+  padding: 120px 60px;
+  position: relative;
+}
+.lp-section-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lp-section-label::before {
+  content: '';
+  width: 28px; height: 1px;
+  background: var(--acid);
+}
+.lp-section-title {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(36px, 4.5vw, 56px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+}
+.lp-section-title em {
+  color: var(--acid);
+  font-style: normal;
+}
+.lp-section-desc {
+  font-size: 17px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 560px;
+}
+.lp-section-center {
+  text-align: center;
+}
+.lp-section-center .lp-section-label {
+  justify-content: center;
+}
+.lp-section-center .lp-section-label::before { display: none; }
+.lp-section-center .lp-section-desc {
+  margin: 0 auto;
+}
+
+/* ── FEATURES ──────────────────────────────────────── */
+.lp-feat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 56px;
+}
+.lp-feat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.lp-feat-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, rgba(163,255,18,0.06), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.lp-feat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(163,255,18,0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.lp-feat-card:hover {
+  border-color: rgba(163,255,18,0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(163,255,18,0.05);
+}
+.lp-feat-card:hover::before,
+.lp-feat-card:hover::after { opacity: 1; }
+.lp-feat-icon {
+  width: 52px; height: 52px;
+  background: rgba(163,255,18,0.08);
+  border: 1px solid rgba(163,255,18,0.12);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 24px;
+  color: var(--acid);
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s;
+}
+.lp-feat-card:hover .lp-feat-icon {
+  background: rgba(163,255,18,0.12);
+  box-shadow: 0 0 20px rgba(163,255,18,0.15);
+}
+.lp-feat-icon svg { width: 24px; height: 24px; }
+.lp-feat-card h3 {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 1;
+}
+.lp-feat-card p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── HOW IT WORKS / STEPS ──────────────────────────── */
+.lp-steps-section {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.lp-steps-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin-top: 64px;
+  position: relative;
+}
+.lp-steps-line {
+  position: absolute;
+  top: 56px;
+  left: 16%;
+  right: 16%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--border-medium), var(--border-medium), transparent);
+}
+.lp-steps-line::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, rgba(163,255,18,0.2), rgba(163,255,18,0.2), transparent);
+  filter: blur(2px);
+}
+.lp-step {
+  text-align: center;
+  padding: 0 32px;
+  position: relative;
+}
+.lp-step-num {
+  width: 44px; height: 44px;
+  background: var(--bg-primary);
+  border: 2px solid rgba(163,255,18,0.2);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 24px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--acid);
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s;
+}
+.lp-step:hover .lp-step-num {
+  background: var(--acid);
+  color: var(--bg-primary);
+  box-shadow: 0 0 30px rgba(163,255,18,0.3);
+  border-color: var(--acid);
+}
+.lp-step-icon {
+  color: var(--acid);
+  margin-bottom: 20px;
+  transition: transform 0.3s;
+}
+.lp-step:hover .lp-step-icon { transform: scale(1.1); }
+.lp-step-icon svg { width: 44px; height: 44px; }
+.lp-step h3 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+.lp-step p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+/* ── PRICING ──────────────────────────────────────── */
+.lp-price-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 56px;
+}
+.lp-price-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 40px 32px;
+  position: relative;
+  transition: all 0.4s;
+}
+.lp-price-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.lp-price-card.lp-popular {
+  border-color: var(--acid);
+  box-shadow: 0 0 60px rgba(163,255,18,0.08), 0 20px 60px rgba(0,0,0,0.4);
+  background: linear-gradient(180deg, rgba(163,255,18,0.03) 0%, var(--bg-card) 40%);
+}
+.lp-popular-badge {
+  position: absolute;
+  top: -14px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--acid);
+  color: var(--bg-primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 20px;
+  border-radius: 100px;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(163,255,18,0.3);
+}
+.lp-price-tier {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+.lp-price-amount {
+  font-family: 'Inter', sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+.lp-price-amount span {
+  font-size: 22px;
+  font-weight: 600;
+  vertical-align: top;
+  margin-top: 10px;
+  display: inline-block;
+  color: var(--text-secondary);
+}
+.lp-price-period {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  margin-bottom: 28px;
+}
+.lp-price-features {
+  list-style: none;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lp-price-features li {
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+}
+.lp-price-features li svg {
+  width: 18px; height: 18px;
+  color: var(--acid);
+  flex-shrink: 0;
+}
+
+/* ── CTA BOX ───────────────────────────────────────── */
+.lp-cta-section {
+  padding: 0 60px 100px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.lp-cta-box {
+  border-radius: 28px;
+  background: var(--acid);
+  padding: 100px 60px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.lp-cta-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(0,0,0,0.06), transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(255,255,255,0.08), transparent 50%);
+}
+.lp-cta-box::after {
+  content: '';
+  position: absolute;
+  top: -50%; right: -20%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(255,255,255,0.1), transparent 60%);
+  border-radius: 50%;
+}
+.lp-cta-box h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(40px, 5vw, 60px);
+  font-weight: 900;
+  color: var(--bg-primary);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+}
+.lp-cta-box p {
+  font-size: 18px;
+  color: rgba(5,5,5,0.6);
+  margin-bottom: 36px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── FOOTER ───────────────────────────────────────── */
+.lp-footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: 80px 60px 40px;
+}
+.lp-footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: 60px;
+  margin-bottom: 60px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.lp-footer-brand p {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  line-height: 1.7;
+  max-width: 260px;
+  margin-top: 16px;
+}
+.lp-footer-social {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.lp-social-icon {
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--text-tertiary);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.lp-social-icon:hover {
+  color: var(--acid);
+  border-color: rgba(163,255,18,0.2);
+  background: rgba(163,255,18,0.05);
+}
+.lp-social-icon svg { width: 16px; height: 16px; }
+.lp-footer-col h4 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 20px;
+}
+.lp-footer-col a {
+  display: block;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  transition: color 0.25s;
+}
+.lp-footer-col a:hover { color: var(--acid); }
+.lp-footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 32px;
+  border-top: 1px solid var(--border-subtle);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.lp-footer-bottom p {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* ── SCROLL ANIMATIONS ────────────────────────────── */
+.lp-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+.lp-reveal.lp-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.lp-reveal-delay-1 { transition-delay: 0.1s; }
+.lp-reveal-delay-2 { transition-delay: 0.2s; }
+.lp-reveal-delay-3 { transition-delay: 0.3s; }
+.lp-reveal-delay-4 { transition-delay: 0.35s; }
+.lp-hero-text { animation: lp-hero-in 0.8s ease forwards; }
+.lp-hero-media { animation: lp-hero-media-in 1s 0.2s ease forwards; opacity: 0; }
+@keyframes lp-hero-in {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes lp-hero-media-in {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── RESPONSIVE ───────────────────────────────────── */
+@media (max-width: 1100px) {
+  .lp-hero-inner { grid-template-columns: 1fr; gap: 60px; }
+  .lp-hero-text { text-align: center; max-width: 100%; }
+  .lp-hero-sub { margin-left: auto; margin-right: auto; }
+  .lp-hero-cta { justify-content: center; }
+  .lp-hero-media { order: -1; }
+  .lp-hero-img { max-width: 500px; }
+  .lp-hero-float-badge { left: auto; right: -10px; bottom: -15px; }
+  .lp-feat-grid { grid-template-columns: 1fr; }
+  .lp-price-grid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; }
+  .lp-footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+}
+
+@media (max-width: 768px) {
+  .lp-nav { padding: 14px 24px; }
+  .lp-nav.scrolled { padding: 12px 24px; }
+  .lp-nav-links { display: none; }
+  .lp-hero { padding: 120px 24px 80px; }
+  .lp-hero h1 { font-size: clamp(38px, 9vw, 56px); }
+  .lp-section, .lp-section-full { padding: 80px 24px; }
+  .lp-steps-row { grid-template-columns: 1fr; gap: 48px; }
+  .lp-steps-line { display: none; }
+  .lp-cta-section { padding: 0 24px 60px; }
+  .lp-cta-box { padding: 60px 28px; border-radius: 20px; }
+  .lp-cta-box h2 { font-size: clamp(32px, 7vw, 44px); }
+  .lp-footer { padding: 60px 24px 32px; }
+  .lp-footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  .lp-footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  .lp-trust-logos { gap: 32px; }
+  .lp-hero-cta { flex-direction: column; }
+  .lp-btn-lg { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body class="landing-page">
+
+<!-- ═══ NAVBAR ═══ -->
+<nav class="lp-nav" id="lp-topnav">
+  <a href="index.html" class="lp-nav-logo">
+    <div class="lp-logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" width="18"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    Koutix
+  </a>
+  <div class="lp-nav-links">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How it Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="lp-nav-right">
+    <a href="pages/login.html" class="lp-btn lp-btn-ghost">Login</a>
+    <a href="pages/login.html" class="lp-btn lp-btn-primary">Start Free Trial</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="lp-hero">
+  <div class="lp-hero-ambient"></div>
+  <div class="lp-hero-grid"></div>
+  <div class="lp-hero-inner">
+    <div class="lp-hero-text">
+      <div class="lp-eyebrow">
+        <span class="lp-eyebrow-dot"></span>
+        Future of Retail
+      </div>
+      <h1>No Queue.<br>No Cashier.<br><span class="lp-accent">Just Walk Out.</span></h1>
+      <p class="lp-hero-sub">Transform your supermarket into a frictionless shopping experience. AI-powered vision meets seamless inventory management.</p>
+      <div class="lp-hero-cta">
+        <a href="pages/login.html" class="lp-btn lp-btn-primary lp-btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Start Free Trial
+        </a>
+        <button class="lp-btn lp-btn-ghost lp-btn-lg" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Book Demo
+        </button>
+      </div>
+    </div>
+    <div class="lp-hero-media">
+      <div class="lp-hero-img-wrapper">
+        <img src="assets/images/hero-futuristic.png" alt="Koutix AI-powered autonomous retail store" class="lp-hero-img">
+      </div>
+      <div class="lp-hero-float-badge">
+        <div class="lp-float-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="lp-float-text">
+          <span>Avg. checkout time</span>
+          <strong>0.3 seconds</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TRUST BAR ═══ -->
+<div class="lp-trust">
+  <div class="lp-trust-label">Trusted by forward-thinking retailers worldwide</div>
+  <div class="lp-trust-logos">
+    <span class="lp-trust-item">FRESHMART</span>
+    <span class="lp-trust-item">URBANGROCER</span>
+    <span class="lp-trust-item">QUICKSTOP</span>
+    <span class="lp-trust-item">GREENBASKET</span>
+    <span class="lp-trust-item">METROFOODS</span>
+  </div>
+</div>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="lp-section" id="features">
+  <div class="lp-section-label lp-reveal">Platform</div>
+  <h2 class="lp-section-title lp-reveal">Engineered for<br><em>Retail Excellence.</em></h2>
+  <p class="lp-section-desc lp-reveal">Everything you need to run a cashierless store — from AI-powered scanning to real-time analytics and payments.</p>
+
+  <div class="lp-feat-grid">
+    <div class="lp-feat-card lp-reveal lp-reveal-delay-1">
+      <div class="lp-feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      </div>
+      <h3>Scan & Go Technology</h3>
+      <p>Proprietary vision algorithms that identify items instantly as customers add them to their digital carts. Zero lag, 99.9% accuracy.</p>
+    </div>
+    <div class="lp-feat-card lp-reveal lp-reveal-delay-2">
+      <div class="lp-feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M12 12v.01"/></svg>
+      </div>
+      <h3>POS Integration</h3>
+      <p>Seamlessly hooks into your existing legacy POS systems. No expensive hardware teardowns — up and running in hours, not weeks.</p>
+    </div>
+    <div class="lp-feat-card lp-reveal lp-reveal-delay-3">
+      <div class="lp-feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>Real-time Inventory</h3>
+      <p>Live stock tracking that updates the millisecond a product leaves the shelf. Never miss a restock window again.</p>
+    </div>
+    <div class="lp-feat-card lp-reveal lp-reveal-delay-4">
+      <div class="lp-feat-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/><path d="M6 16h4"/></svg>
+      </div>
+      <h3>Per-store Payments</h3>
+      <p>Hyper-localized payment routing. Manage multiple branches with dedicated financial dashboards and automatic settlements.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="lp-section-full lp-steps-section" id="how-it-works">
+  <div style="max-width:1400px;margin:0 auto">
+    <div class="lp-section-center">
+      <div class="lp-section-label lp-reveal">The Frictionless Journey</div>
+      <h2 class="lp-section-title lp-reveal">Simple as <em>1–2–3.</em></h2>
+      <p class="lp-section-desc lp-reveal">From entrance to exit in under 60 seconds. No lines, no waiting — just shopping.</p>
+    </div>
+    <div class="lp-steps-row">
+      <div class="lp-steps-line"></div>
+      <div class="lp-step lp-reveal lp-reveal-delay-1">
+        <div class="lp-step-num">1</div>
+        <div class="lp-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+        </div>
+        <h3>Scan Items</h3>
+        <p>Customers use the Koutix app to scan barcodes as they shop. Instant cart updates.</p>
+      </div>
+      <div class="lp-step lp-reveal lp-reveal-delay-2">
+        <div class="lp-step-num">2</div>
+        <div class="lp-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </div>
+        <h3>Pay in App</h3>
+        <p>One-tap checkout using saved cards, Apple Pay, or Google Pay. Secure and instant.</p>
+      </div>
+      <div class="lp-step lp-reveal lp-reveal-delay-3">
+        <div class="lp-step-num">3</div>
+        <div class="lp-step-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <h3>Walk Out</h3>
+        <p>Digital receipt is issued immediately. Customers exit without stopping at a kiosk.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section class="lp-section" id="pricing">
+  <div class="lp-section-center">
+    <div class="lp-section-label lp-reveal">Plans</div>
+    <h2 class="lp-section-title lp-reveal">Scale with <em>Koutix.</em></h2>
+    <p class="lp-section-desc lp-reveal">Every plan includes a <strong style="color:var(--acid)">14-day free trial.</strong> No credit card required.</p>
+  </div>
+
+  <div class="lp-price-grid">
+    <!-- Growth -->
+    <div class="lp-price-card lp-reveal lp-reveal-delay-1">
+      <div class="lp-price-tier">Growth</div>
+      <div class="lp-price-amount"><span>$</span>499</div>
+      <div class="lp-price-period">/month</div>
+      <ul class="lp-price-features">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Up to 2 Store Locations</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Real-time Analytics</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Email Support</li>
+      </ul>
+      <button class="lp-btn lp-btn-ghost" style="width:100%;justify-content:center">Get Started</button>
+    </div>
+
+    <!-- Enterprise -->
+    <div class="lp-price-card lp-popular lp-reveal lp-reveal-delay-2">
+      <div class="lp-popular-badge">Most Popular</div>
+      <div class="lp-price-tier">Enterprise</div>
+      <div class="lp-price-amount"><span>$</span>1,299</div>
+      <div class="lp-price-period">/month</div>
+      <ul class="lp-price-features">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Unlimited Locations</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Advanced POS Sync</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>24/7 Priority Support</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Custom UI Branding</li>
+      </ul>
+      <a href="pages/login.html" class="lp-btn lp-btn-primary" style="width:100%;justify-content:center;display:flex;text-decoration:none">Start 14-Day Trial</a>
+    </div>
+
+    <!-- Custom -->
+    <div class="lp-price-card lp-reveal lp-reveal-delay-3">
+      <div class="lp-price-tier">Global</div>
+      <div class="lp-price-amount" style="font-size:42px;margin-top:8px">Custom</div>
+      <div class="lp-price-period">&nbsp;</div>
+      <ul class="lp-price-features">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Dedicated Account Manager</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>On-site Implementation</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Hardware Discounts</li>
+      </ul>
+      <button class="lp-btn lp-btn-ghost" style="width:100%;justify-content:center">Contact Sales</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<div class="lp-cta-section">
+  <div class="lp-cta-box lp-reveal">
+    <h2>Ready to revolutionize<br>your store?</h2>
+    <p>Join hundreds of retailers already using Koutix to deliver frictionless shopping.</p>
+    <a href="pages/login.html" class="lp-btn lp-btn-dark lp-btn-lg" style="position:relative;z-index:1">
+      Start your smart store today
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="lp-footer" id="contact">
+  <div class="lp-footer-grid">
+    <div class="lp-footer-brand">
+      <div class="lp-nav-logo" style="margin-bottom:4px">
+        <div class="lp-logo-mark" style="width:32px;height:32px;box-shadow:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" width="17"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        Koutix
+      </div>
+      <p>The next generation of autonomous retail technology for the modern world.</p>
+      <div class="lp-footer-social">
+        <a class="lp-social-icon" href="#" aria-label="Twitter">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+        <a class="lp-social-icon" href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"/></svg>
+        </a>
+        <a class="lp-social-icon" href="mailto:info@koutix.io" aria-label="Email">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="lp-footer-col">
+      <h4>Product</h4>
+      <a href="#features">Features</a>
+      <a href="#">Integration</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#">Status</a>
+    </div>
+    <div class="lp-footer-col">
+      <h4>Legal</h4>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Security</a>
+    </div>
+    <div class="lp-footer-col">
+      <h4>Connect</h4>
+      <a href="mailto:info@koutix.io">info@koutix.io</a>
+      <a href="#">Support Center</a>
+      <a href="#">API Documentation</a>
+    </div>
+  </div>
+  <div class="lp-footer-bottom">
+    <p>© 2024 Koutix Kinetic. All Rights Reserved.</p>
+    <p style="font-size:12px;color:var(--text-tertiary)">Designed for the future of retail</p>
+  </div>
+</footer>
+
+<script>
+// ── Navbar scroll effect
+const nav = document.getElementById('lp-topnav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// ── Intersection Observer for reveal animations
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('lp-visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.lp-reveal').forEach(el => revealObserver.observe(el));
+
+// ── Smooth scroll for anchor links
+document.querySelectorAll('.lp-nav-links a[href^="#"]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>

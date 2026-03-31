@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — Architecture Selection</title>
+<link rel="stylesheet" href="../css/global.css">
+<style>
+body { 
+    background: var(--black); 
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ── GRID BG ── */
+.ob-grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.ob-layout {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 60px 80px;
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── SYSTEM BAR ── */
+.ob-sysbar {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+}
+
+.ob-header { margin-bottom: 64px; }
+.ob-title { 
+    font-family: var(--font-display); 
+    font-size: clamp(56px, 8vw, 88px); 
+    font-weight: 900;
+    line-height: 0.9; 
+    letter-spacing: -0.04em;
+    color: #fff; 
+    margin: 0 0 20px;
+}
+.ob-title em { 
+    font-style: italic; 
+    color: var(--acid); 
+    text-shadow: 0 0 60px rgba(163,255,18,0.2);
+}
+.ob-subtitle {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.ob-subtitle::before {
+    content: '';
+    width: 32px;
+    height: 2px;
+    background: var(--acid);
+}
+
+/* ── PHASE LABEL ── */
+.ob-phase {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--acid);
+    margin-bottom: 32px;
+}
+.ob-phase::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: rgba(163,255,18,0.3);
+}
+
+.arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+.arch-card {
+    background: rgba(255,255,255,0.015);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 24px;
+    padding: 44px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+.arch-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(163,255,18,0.04), transparent 60%);
+    opacity: 0;
+    transition: 0.4s;
+}
+.arch-card:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(163,255,18,0.2);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.arch-card:hover::before { opacity: 1; }
+.arch-card.selected {
+    background: rgba(163,255,18,0.03);
+    border-color: var(--acid);
+    box-shadow: 0 0 60px rgba(163,255,18,0.08), 0 20px 60px rgba(0,0,0,0.4);
+}
+
+/* ── CARD CODE TAG ── */
+.arch-code {
+    position: absolute;
+    top: 28px;
+    right: 28px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+}
+
+.arch-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 28px;
+    transition: 0.4s;
+    transform: rotate(-6deg);
+}
+.arch-card.selected .arch-icon { 
+    background: var(--acid); 
+    border-color: var(--acid);
+    box-shadow: 0 0 24px rgba(163,255,18,0.2);
+    transform: rotate(0deg);
+}
+.arch-icon svg { width: 28px; height: 28px; color: var(--text-muted); transition: 0.4s; }
+.arch-card.selected .arch-icon svg { color: var(--black); }
+
+.arch-card h3 { 
+    font-size: 22px; 
+    font-weight: 900; 
+    color: #fff; 
+    margin-bottom: 12px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.04em; 
+}
+.arch-card p { 
+    font-size: 15px; 
+    color: var(--text-muted); 
+    line-height: 1.7; 
+    margin: 0; 
+}
+
+.arch-check {
+    position: absolute;
+    top: 28px;
+    right: 28px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--acid);
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: 0.3s;
+    box-shadow: 0 0 12px rgba(163,255,18,0.3);
+}
+.arch-card.selected .arch-check { opacity: 1; transform: scale(1); }
+.arch-card.selected .arch-code { display: none; }
+
+/* ── STATUS LINE ── */
+.arch-status {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    transition: 0.3s;
+}
+.arch-status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    transition: 0.3s;
+}
+.arch-card.selected .arch-status {
+    color: var(--acid);
+}
+.arch-card.selected .arch-status-dot {
+    background: var(--acid);
+    box-shadow: 0 0 8px var(--acid);
+}
+
+/* ── BOTTOM SECTION ── */
+.ob-bottom {
+    margin-top: auto;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 24px;
+    align-items: center;
+}
+.ob-assist {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.ob-assist-avatar {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    position: relative;
+}
+.ob-assist-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 10px; height: 10px;
+    background: var(--acid);
+    border-radius: 50%;
+    border: 2px solid var(--black);
+}
+.ob-assist-avatar svg { width: 20px; height: 20px; color: var(--text-muted); }
+.ob-assist-text {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.ob-assist-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--acid);
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+}
+.ob-back-btn {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: color 0.2s;
+    padding: 14px 24px;
+}
+.ob-back-btn:hover { color: var(--text); }
+.ob-continue-btn {
+    padding: 16px 48px;
+    background: var(--acid);
+    color: var(--black);
+    border: none;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: var(--font-body);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 0 24px rgba(163,255,18,0.2);
+}
+.ob-continue-btn:hover {
+    background: #b8ff3a;
+    box-shadow: 0 0 40px rgba(163,255,18,0.35);
+    transform: translateY(-2px);
+}
+
+/* ── FOOTER ── */
+.ob-footer {
+    padding: 32px 80px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+}
+.ob-footer-brand {
+    font-weight: 900;
+    font-size: 16px;
+    font-style: italic;
+    letter-spacing: -0.01em;
+}
+.ob-footer-copy {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+.ob-footer-links {
+    display: flex;
+    gap: 32px;
+}
+.ob-footer-links a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+}
+.ob-footer-links a:hover { color: var(--acid); }
+.ob-footer-coords {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: rgba(255,255,255,0.08);
+    letter-spacing: 0.05em;
+    text-align: right;
+    margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+    .ob-layout { padding: 40px 24px; }
+    .arch-grid { grid-template-columns: 1fr; }
+    .ob-bottom { grid-template-columns: 1fr; }
+    .ob-footer { padding: 24px; flex-direction: column; gap: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+<div class="ob-grid-bg"></div>
+
+<div class="ob-layout">
+    <div class="ob-sysbar fade-up">SYS_VER: 2.0.4 // KINETIC WORKSPACE // EST REF: 14.28.1</div>
+    
+    <div class="ob-header fade-up">
+        <h1 class="ob-title">GET <em>STARTED</em></h1>
+        <div class="ob-subtitle">Define your business architecture protocol</div>
+    </div>
+
+    <div class="ob-phase">Phase 01</div>
+
+    <div class="arch-grid">
+        <div class="arch-card" onclick="selectArch('chain', this)">
+            <div class="arch-check"><svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="3" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="arch-code">ARCH.302</div>
+            <div class="arch-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/>
+                    <line x1="6" y1="10" x2="6" y2="14"/><line x1="18" y1="10" x2="18" y2="14"/>
+                </svg>
+            </div>
+            <h3>Chain / Multi-Branch</h3>
+            <p>Enterprise-scale orchestration. Centralized command, global sync, and multi-node reporting architecture.</p>
+            <div class="arch-status">
+                <span class="arch-status-dot"></span>
+                Initialize Mode
+            </div>
+        </div>
+
+        <div class="arch-card" onclick="selectArch('store', this)">
+            <div class="arch-check"><svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="3" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="arch-code">ARCH.601</div>
+            <div class="arch-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+            </div>
+            <h3>Single Store</h3>
+            <p>High-velocity local node operation. Optimized for singular retail points and agile performance.</p>
+            <div class="arch-status">
+                <span class="arch-status-dot"></span>
+                Initialize Mode
+            </div>
+        </div>
+    </div>
+
+    <div class="ob-bottom">
+        <div class="ob-assist">
+            <div class="ob-assist-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+                <div class="ob-assist-text">Need architecture insight?</div>
+                <div class="ob-assist-sub">ACTIVE_SESSION: SOLUTION SPECIALIST</div>
+            </div>
+        </div>
+        <a href="login.html" class="ob-back-btn">[ BACK ]</a>
+        <button id="next-btn" class="ob-continue-btn" onclick="goNext()">
+            CONTINUE
+            <span>»</span>
+        </button>
+    </div>
+</div>
+
+<footer class="ob-footer">
+    <div>
+        <div class="ob-footer-brand">KOUTIX</div>
+        <div class="ob-footer-copy">© 2024 KINETIC_PROTOCOL // ALL UNITS OPERATIONAL</div>
+    </div>
+    <div class="ob-footer-links">
+        <a href="#">PRCY</a>
+        <a href="#">TRMS</a>
+        <a href="#">SCTY</a>
+    </div>
+</footer>
+
+<script src="../js/app.js"></script>
+<script>
+let selected = null;
+
+function selectArch(type, el) {
+    document.querySelectorAll('.arch-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selected = type;
+    sessionStorage.setItem('koutix_arch', type);
+    
+    // Update status text
+    el.querySelector('.arch-status').innerHTML = '<span class="arch-status-dot"></span> Architecture Active ✓';
+}
+
+function goNext() {
+    if (!selected) {
+        Toast.error('Please select an architecture entity');
+        return;
+    }
+    window.location.href = 'configure.html';
+}
+</script>
+</body>
+</html>

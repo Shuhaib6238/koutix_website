@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — Chain Manager</title>
+<link rel="stylesheet" href="../css/global.css">
+<style>
+.branch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:28px 40px}
+.bc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .3s}
+.bc:hover{border-color:rgba(255,255,255,0.1);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.bc-head{padding:20px 20px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.bc-name{font-size:20px;font-weight:800;line-height:1.1;margin-bottom:4px;letter-spacing:-0.01em}
+.bc-addr{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.bc-addr svg{width:12px;height:12px;flex-shrink:0}
+.bc-img{margin:16px;border-radius:12px;overflow:hidden;height:120px;background:rgba(255,255,255,0.02);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.bc-img img{width:100%;height:100%;object-fit:cover}
+.bc-awaiting{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px}
+.bc-awaiting svg{width:32px;height:32px;color:var(--text-dim)}
+.bc-awaiting p{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);font-weight:700}
+.bc-stats{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--border);margin-top:4px}
+.bc-stat{padding:14px 20px;border-right:1px solid var(--border)}
+.bc-stat:last-child{border-right:none}
+.bc-stat-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;font-weight:600}
+.bc-stat-val{font-family:var(--font-display);font-size:22px;font-weight:900;letter-spacing:-0.01em}
+.bc-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.avatars{display:flex}
+.av-sm{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px solid var(--card);margin-right:-6px;display:grid;place-items:center;font-size:9px;font-weight:700;color:var(--text-muted)}
+.manage-link{font-size:13px;font-weight:700;color:var(--acid);cursor:pointer;display:flex;align-items:center;gap:4px;transition:gap .2s}
+.manage-link:hover{gap:8px}
+.bc-invited{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center}
+.invited-icon{width:36px;height:36px;background:rgba(163,255,18,.08);border:1px solid rgba(163,255,18,.12);border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+.invited-icon svg{width:18px;height:18px;color:var(--acid)}
+.invited-text p{font-size:13px;font-weight:700;margin-bottom:2px}
+.invited-text span{font-size:11px;color:var(--text-muted)}
+.add-branch-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(12px);z-index:500;place-items:center}
+.add-branch-modal.show{display:grid}
+.modal-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:480px;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
+.modal-title{font-size:22px;font-weight:800;margin-bottom:24px;letter-spacing:-0.01em}
+.search-bar{display:flex;gap:12px;padding:20px 40px;border-bottom:1px solid var(--border)}
+.search-input{flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px 16px;transition:border-color 0.2s}
+.search-input:focus-within{border-color:rgba(163,255,18,0.2)}
+.search-input svg{width:16px;height:16px;color:var(--text-muted);flex-shrink:0}
+.search-input input{background:none;border:none;color:var(--text);font-size:14px;width:100%;font-family:var(--font-body)}
+.search-input input::placeholder{color:var(--text-dim)}
+.filter-btn{display:flex;align-items:center;gap:6px;padding:10px 16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:all .2s;font-family:var(--font-body)}
+.filter-btn:hover{border-color:var(--border-hover);color:var(--text)}
+.filter-btn svg{width:14px;height:14px}
+@media(max-width:900px){.branch-grid{grid-template-columns:1fr}.search-bar{flex-direction:column;padding:16px 24px}}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div style="width:38px;height:38px;background:var(--acid);border-radius:10px;display:grid;place-items:center;margin-bottom:10px;box-shadow:0 0 20px rgba(163,255,18,0.2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" width="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div style="font-size:18px;font-weight:800">Koutix</div>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-top:2px">Enterprise Edition</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analytics</a>
+      <a href="chain.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Branches</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Inventory</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l-1.41 1.41M20.49 12H22M2 12H3.51M19.07 19.07l-1.41-1.41M4.93 4.93 3.52 3.52M12 20.49V22M12 2v1.51"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-upgrade">🚀 Upgrade Plan</div>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Help</a>
+      <a href="login.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-eyebrow">Global Network</div>
+        <h1>Chain Manager</h1>
+        <p>Oversee your retail ecosystem with real-time operational insights across all geographical territories.</p>
+      </div>
+      <button class="btn btn-acid" onclick="document.getElementById('add-modal').classList.add('show')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Branch
+      </button>
+    </div>
+    <div class="search-bar">
+      <div class="search-input">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search by branch name, city, or manager..." id="search-input" oninput="filterBranches(this.value)">
+      </div>
+      <button class="filter-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>Status</button>
+      <button class="filter-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Region</button>
+      <button class="filter-btn" style="color:var(--acid);border-color:rgba(163,255,18,.2)">Clear all</button>
+    </div>
+    <div class="branch-grid" id="branches-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-muted)">
+        <div class="spinner" style="margin:0 auto 16px;width:32px;height:32px"></div>
+        Loading branches…
+      </div>
+    </div>
+    <footer style="border-top:1px solid var(--border);padding:32px 40px;display:grid;grid-template-columns:1fr repeat(3,auto);gap:60px">
+      <div><p style="font-weight:800;margin-bottom:6px">Koutix Kinetic</p><p style="font-size:12px;color:var(--text-dim)">© 2024 Koutix Kinetic. All Rights Reserved.</p></div>
+      <div><p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;font-weight:700">Platform</p><a href="#" style="display:block;font-size:13px;color:var(--text-dim);margin-bottom:8px">Security</a><a href="#" style="display:block;font-size:13px;color:var(--text-dim)">Status</a></div>
+      <div><p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;font-weight:700">Legal</p><a href="#" style="display:block;font-size:13px;color:var(--text-dim);margin-bottom:8px">Privacy</a><a href="#" style="display:block;font-size:13px;color:var(--text-dim)">Terms</a></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:36px;height:36px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" width="16"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div style="width:36px;height:36px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" width="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<div class="add-branch-modal" id="add-modal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-card">
+    <div class="modal-title">Add New Branch</div>
+    <div class="form-group" style="margin-bottom:16px"><label class="input-label">Branch Name</label><input type="text" class="input-field" id="m-name" placeholder="e.g. Paris Central"></div>
+    <div class="form-group" style="margin-bottom:16px"><label class="input-label">Address</label><input type="text" class="input-field" id="m-addr" placeholder="Street, City, Country"></div>
+    <div class="form-group" style="margin-bottom:16px"><label class="input-label">Manager Email (for invite)</label><input type="email" class="input-field" id="m-mgr" placeholder="manager@store.com"></div>
+    <div style="display:flex;gap:12px;margin-top:24px">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="document.getElementById('add-modal').classList.remove('show')">Cancel</button>
+      <button class="btn btn-acid" style="flex:1;justify-content:center" id="add-btn" onclick="addBranch()">Send Invitation</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+let allBranches = [];
+async function loadBranches() {
+  try {
+    const res = await Backend.getBranches();
+    allBranches = res.data || [];
+    renderBranches(allBranches);
+  } catch(e) { document.getElementById('branches-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-muted)">Failed to load branches.</div>'; }
+}
+function renderBranches(list) {
+  const grid = document.getElementById('branches-grid');
+  if (!list.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-muted)">No branches found.</div>'; return; }
+  grid.innerHTML = list.map(b => {
+    const isJoined = b.status === 'joined';
+    const isInvited = b.status === 'invited';
+    return `<div class="bc fade-up">
+      <div class="bc-head">
+        <div>
+          <div class="bc-name">${b.name}</div>
+          <div class="bc-addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${b.address}</div>
+        </div>
+        <span class="badge ${isJoined?'badge-acid':isInvited?'badge-orange':'badge-gray'}" style="font-size:10px">${b.status.toUpperCase()}</span>
+      </div>
+      <div class="bc-img">${b.img ? `<img src="${b.img}" alt="${b.name}">` : `<div class="bc-awaiting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg><p>Awaiting Setup</p></div>`}</div>
+      ${isJoined ? `
+        <div class="bc-stats">
+          <div class="bc-stat"><div class="bc-stat-label">Weekly Revenue</div><div class="bc-stat-val">${b.name.includes('London')?'£':'$'}${(b.revenue/1000).toFixed(1)}k</div></div>
+          <div class="bc-stat"><div class="bc-stat-label">Footfall</div><div class="bc-stat-val">${(b.footfall/1000).toFixed(1)}k</div></div>
+        </div>
+        <div class="bc-foot">
+          <div class="avatars"><div class="av-sm">A</div><div class="av-sm">B</div><div class="av-sm">+</div></div>
+          <a href="dashboard.html" class="manage-link">Manage →</a>
+        </div>` : `
+        <div class="bc-invited">
+          <div class="invited-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div class="invited-text"><p>Pending Invitation</p><span>Sent to manager@branch.com</span></div>
+        </div>
+        <div style="padding:12px 20px;display:flex;gap:8px">
+          <button class="btn btn-ghost" style="flex:1;justify-content:center;font-size:12px;padding:8px">Resend Invite</button>
+          <button class="btn btn-dark" style="flex:1;justify-content:center;font-size:12px;padding:8px">Edit Details</button>
+        </div>`}
+    </div>`;
+  }).join('');
+}
+function filterBranches(q) {
+  const filtered = q ? allBranches.filter(b => b.name.toLowerCase().includes(q.toLowerCase()) || b.address.toLowerCase().includes(q.toLowerCase())) : allBranches;
+  renderBranches(filtered);
+}
+async function addBranch() {
+  const btn = document.getElementById('add-btn');
+  const name = document.getElementById('m-name').value.trim();
+  const address = document.getElementById('m-addr').value.trim();
+  const email = document.getElementById('m-mgr').value.trim();
+  if (!name || !address || !email) { Toast.error('Branch name, address, and manager email are required'); return; }
+  Loader.show(btn);
+  try {
+    const res = await Backend.inviteBranch({ branchName: name, branchAddress: address, branchEmail: email });
+    const b = { name, address, status: 'invited', email };
+    allBranches.push(b); renderBranches(allBranches);
+    document.getElementById('add-modal').classList.remove('show');
+    ['m-name','m-addr','m-mgr'].forEach(id => document.getElementById(id).value = '');
+    Toast.success('Invitation sent to manager!');
+  } catch(e) { Toast.error(e.message || 'Failed to send branch invitation.'); }
+  Loader.hide(btn);
+}
+loadBranches();
+</script>
+</body>
+</html>

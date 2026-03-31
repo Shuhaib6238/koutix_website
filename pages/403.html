@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — Access Denied</title>
+<link rel="stylesheet" href="../css/global.css">
+<style>
+body{display:grid;place-items:center;min-height:100vh;text-align:center;position:relative;overflow:hidden}
+body::after{content:'';position:fixed;width:500px;height:500px;background:radial-gradient(circle,rgba(255,77,77,0.04),transparent 60%);top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none}
+.num{font-family:var(--font-display);font-size:clamp(120px,20vw,200px);font-weight:900;line-height:1;color:rgba(255,255,255,0.03);position:relative;letter-spacing:-0.05em}
+.num::after{content:'403';position:absolute;inset:0;color:var(--red);clip-path:polygon(0 55%,100% 55%,100% 100%,0 100%);text-shadow:0 0 60px rgba(255,77,77,0.2)}
+h2{font-size:24px;font-weight:800;margin-top:-12px;margin-bottom:12px;letter-spacing:-0.02em}
+p{font-size:15px;color:var(--text-muted);margin-bottom:32px}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+<div>
+  <div class="num">403</div>
+  <h2>Access Denied</h2>
+  <p>You don't have permission to view this page.</p>
+  <a href="dashboard.html" class="btn btn-ghost" style="font-size:15px;padding:14px 28px">← Back to Dashboard</a>
+</div>
+</body>
+</html>

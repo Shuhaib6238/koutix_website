@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — Enterprise Portal</title>
+<link rel="stylesheet" href="../css/global.css">
+<!-- Firebase SDK (Compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<style>
+body {
+    display: flex;
+    min-height: 100vh;
+    background: var(--black);
+    overflow: hidden;
+}
+
+/* ── LEFT PANEL ── */
+.login-left {
+    width: 55%;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 48px;
+}
+.login-left-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('../assets/images/login-bg.png');
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+}
+.login-left-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(5,5,5,0.3) 0%, rgba(5,5,5,0.6) 50%, rgba(5,5,5,0.92) 100%);
+}
+.login-left-logo {
+    position: absolute;
+    top: 40px;
+    left: 48px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.login-left-logo .mark {
+    width: 36px; height: 36px;
+    background: var(--acid);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 0 20px rgba(163,255,18,0.3);
+}
+.login-left-logo span {
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+}
+.login-left-content {
+    position: relative;
+    z-index: 2;
+}
+.login-left-heading {
+    font-size: clamp(48px, 6vw, 72px);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+}
+.login-left-heading em {
+    font-style: italic;
+    color: var(--acid);
+    text-shadow: 0 0 60px rgba(163,255,18,0.3);
+}
+.login-left-sub {
+    font-size: 16px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 400px;
+    margin-bottom: 40px;
+}
+.login-stats {
+    display: flex;
+    gap: 48px;
+}
+.login-stat-item {
+    display: flex;
+    flex-direction: column;
+}
+.login-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+}
+.login-stat-val {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--acid);
+}
+
+/* ── RIGHT PANEL ── */
+.login-right {
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 64px;
+    position: relative;
+}
+.login-right::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.06), rgba(255,255,255,0.06), transparent);
+}
+.login-title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+}
+.login-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+/* ── FORM ── */
+.login-form-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    backdrop-filter: blur(20px);
+}
+.form-field { margin-bottom: 24px; }
+.field-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+.field-label a {
+    font-size: 11px;
+    color: var(--acid);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    transition: opacity 0.2s;
+}
+.field-label a:hover { opacity: 0.8; }
+.input-wrap { position: relative; }
+.input-wrap input {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 15px 18px;
+    color: #fff;
+    font-size: 15px;
+    font-family: var(--font-body);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.input-wrap input::placeholder { color: var(--text-dim); }
+.input-wrap input:focus {
+    border-color: var(--acid);
+    background: rgba(163,255,18,0.02);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(163,255,18,0.06), 0 0 20px rgba(163,255,18,0.08);
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--acid);
+    color: var(--black);
+    border: none;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 14px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+    margin-top: 8px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 0 0 24px rgba(163,255,18,0.2);
+}
+.auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(163,255,18,0.35), 0 8px 24px rgba(0,0,0,0.3);
+    background: #b8ff3a;
+}
+.auth-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ── DIVIDER ── */
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 28px 0;
+}
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+.login-divider span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+/* ── SOCIAL BUTTONS ── */
+.social-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.25s;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.social-btn:hover {
+    border-color: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+}
+.social-btn svg { width: 16px; height: 16px; }
+
+/* ── FOOTER LINKS ── */
+.login-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 28px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.login-footer a {
+    color: var(--acid);
+    font-weight: 700;
+    transition: opacity 0.2s;
+}
+.login-footer a:hover { opacity: 0.8; }
+
+.sys-tag {
+    position: fixed;
+    bottom: 24px;
+    right: 32px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.12);
+    font-weight: 600;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+    .login-left { display: none; }
+    .login-right { width: 100%; padding: 40px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="login-left">
+    <div class="login-left-bg"></div>
+    <div class="login-left-logo">
+        <div class="mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" width="18"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span>KOUTIX</span>
+    </div>
+    <div class="login-left-content">
+        <h1 class="login-left-heading">REDEFINING<br><em>RETAIL</em><br>KINETICS.</h1>
+        <p class="login-left-sub">Harnessing high-frequency data to synchronize enterprise identity with real-time market motion.</p>
+        <div class="login-stats">
+            <div class="login-stat-item">
+                <span class="login-stat-label">System Load</span>
+                <span class="login-stat-val">4.2%</span>
+            </div>
+            <div class="login-stat-item">
+                <span class="login-stat-label">Uptime</span>
+                <span class="login-stat-val">99.99%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="login-right">
+    <h2 class="login-title">Welcome to the Future of Retail</h2>
+    <p class="login-subtitle">Please enter your credentials to access the enterprise dashboard.</p>
+    
+    <div class="login-form-card">
+        <div class="form-field">
+            <div class="field-label"><span>Email Address</span></div>
+            <div class="input-wrap">
+                <input type="email" id="email" placeholder="name@company.com" spellcheck="false">
+            </div>
+        </div>
+
+        <div class="form-field">
+            <div class="field-label">
+                <span>Password</span>
+                <a href="#">Forgot Password?</a>
+            </div>
+            <div class="input-wrap">
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+        </div>
+
+        <button id="login-btn" class="auth-btn">
+            Sign In to Dashboard
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="login-divider"><span>Or continue with</span></div>
+
+    <div class="social-row">
+        <button class="social-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Google
+        </button>
+        <button class="social-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            SSO
+        </button>
+    </div>
+
+    <div class="login-footer">
+        <span>No account? <a href="onboarding.html">Request Access</a></span>
+        <span style="font-size:11px;color:var(--text-dim)">© 2024 KOUTIX KINETIC</span>
+    </div>
+</div>
+
+<div class="sys-tag">KX-CORE-V2 // PROTOCOL ACTIVE</div>
+
+<script src="../js/app.js"></script>
+<script>
+const btn = document.getElementById('login-btn');
+
+btn.addEventListener('click', async () => {
+    const email = document.getElementById('email').value.trim();
+    const pass = document.getElementById('password').value;
+    
+    if (!email || !pass) {
+        Toast.error('Identity and security key required');
+        return;
+    }
+
+    Loader.show(btn);
+    try {
+        const res = await Backend.login(email, pass);
+        Toast.success('Access Granted. welcome back.');
+        
+        // Redirect based on role
+        setTimeout(async () => {
+            let role = res.user?.role;
+            
+            // If Firebase custom claims are stale, fetch the actual role from backend
+            if (!role) {
+                try {
+                    const meRes = await Backend.getMe();
+                    role = meRes.data?.role;
+                } catch(err) { console.warn('Failed to fetch fallback role'); }
+            }
+
+            if (role === 'superadmin') {
+                window.location.href = '/superadmin';
+            } else if (role === 'branch_manager') {
+                window.location.href = '/branch-dashboard';
+            } else if (role === 'chain_manager' || role === 'store_manager') {
+                window.location.href = '/dashboard';
+            } else {
+                window.location.href = '/onboarding';
+            }
+        }, 1000);
+    } catch (e) {
+        console.error(e);
+        Toast.error(e.message || 'Authentication failed');
+        Loader.hide(btn);
+    }
+});
+
+document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') btn.click();
+});
+</script>
+</body>
+</html>
