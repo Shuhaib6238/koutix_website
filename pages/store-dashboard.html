@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — My Store</title>
+<link rel="stylesheet" href="../css/global.css">
+<style>
+.dashboard-body{padding:28px 40px;display:grid;grid-template-columns:1fr 300px;gap:24px}
+.left-col{display:flex;flex-direction:column;gap:20px}
+.right-col{display:flex;flex-direction:column;gap:20px}
+.order-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);transition:background 0.2s}
+.order-row:hover{background:rgba(255,255,255,0.02);border-radius:8px;margin:0 -8px;padding:14px 8px}
+.order-row:last-child{border-bottom:none}
+.order-row.delayed{border-left:3px solid var(--red);padding-left:12px;margin-left:-12px}
+.order-num{width:44px;height:44px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;display:grid;place-items:center;font-family:var(--font-mono);font-weight:600;font-size:12px;flex-shrink:0}
+.order-num.priority{background:rgba(163,255,18,0.08);color:var(--acid);border-color:rgba(163,255,18,0.15)}
+.order-num.delayed{background:rgba(255,77,77,0.08);color:var(--red);border-color:rgba(255,77,77,0.15)}
+.order-info{flex:1}
+.order-name{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.order-meta{font-size:12px;color:var(--text-muted)}
+.order-actions{display:flex;gap:8px}
+.tab-bar{display:flex;gap:0;margin-bottom:4px}
+.tab{padding:8px 16px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:.2s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--acid);border-bottom-color:var(--acid)}
+.sys-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.sys-row:last-child{border-bottom:none}
+.sys-label{font-size:13px;font-weight:600}
+.sys-stat{font-size:11px;font-weight:700;letter-spacing:.08em;display:flex;align-items:center;gap:6px;font-family:var(--font-mono)}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--acid);box-shadow:0 0 6px var(--acid)}
+.dot-red{background:var(--red);box-shadow:0 0 6px var(--red)}
+.dot-gray{background:var(--text-dim)}
+.qc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qc{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;transition:all .25s}
+.qc:hover{border-color:var(--border-hover);background:rgba(163,255,18,0.03);transform:translateY(-2px)}
+.qc svg{width:22px;height:22px;color:var(--acid)}
+.qc span{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+.branch-status{padding:16px 20px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;margin-top:auto}
+.branch-status .label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+.branch-status .bname{font-size:16px;font-weight:800}
+.op-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acid)}
+.op-badge::before{content:'';width:8px;height:8px;background:var(--acid);border-radius:50%;animation:pulse-dot 2s infinite;box-shadow:0 0 6px var(--acid)}
+@media(max-width:900px){.dashboard-body{grid-template-columns:1fr}.right-col{order:-1}}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div style="width:38px;height:38px;background:var(--acid);border-radius:10px;display:grid;place-items:center;margin-bottom:10px;box-shadow:0 0 20px rgba(163,255,18,0.2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" width="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div style="font-size:18px;font-weight:800">Koutix</div>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-top:2px">Store Manager</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/store-dashboard" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analytics</a>
+      <a href="/pos" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>POS Connection</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>Inventory</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l-1.41 1.41M20.49 12H22M2 12H3.51M19.07 19.07l-1.41-1.41M4.93 4.93 3.52 3.52M12 20.49V22M12 2v1.51"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="branch-status">
+        <span class="label">Store Owner</span>
+        <span class="bname" id="owner-name">Loading...</span>
+        <div class="op-badge">Operational</div>
+      </div>
+      <a href="/profile" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Profile</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>Help</a>
+      <a href="/login" onclick="Backend.logout(); return false;" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2 id="store-title">My Store</h2>
+        <p id="store-info">Loading store details...</p>
+      </div>
+      <div class="topbar-right">
+        <div class="pos-status"><span class="pos-dot"></span>SYSTEM ONLINE</div>
+        <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <a href="/profile" class="avatar" style="display:grid;place-items:center;text-decoration:none" title="My Profile"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" width="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
+      </div>
+    </div>
+
+    <div style="padding:24px 40px">
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-label">Today's Revenue</div><div class="stat-value" id="stat-revenue">--</div><div class="stat-sub"><span class="up" id="stat-revenue-change"></span></div></div>
+        <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value" id="stat-orders">--</div><div class="stat-sub"><span id="stat-orders-sub"></span></div></div>
+        <div class="stat-card accent"><div class="stat-label">Active Orders</div><div class="stat-value" id="stat-active">--</div><div class="stat-sub" id="stat-active-sub">--</div></div>
+      </div>
+    </div>
+
+    <div class="dashboard-body">
+      <div class="left-col">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <h3 style="font-size:20px;font-weight:800">Recent Orders</h3>
+            <div class="tab-bar">
+              <div class="tab active" onclick="filterOrders('all',this)">All</div>
+              <div class="tab" onclick="filterOrders('priority',this)">Priority</div>
+              <div class="tab" onclick="filterOrders('delayed',this)">Delayed</div>
+            </div>
+          </div>
+          <div id="orders-list"><div style="text-align:center;padding:40px;color:var(--text-muted)"><div class="spinner" style="margin:0 auto 12px;width:24px;height:24px"></div>Loading orders...</div></div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <!-- POS Status Widget -->
+        <a href="/pos" class="card" id="pos-widget" style="cursor:pointer;text-decoration:none">
+          <h3 style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px">POS Connection</h3>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div id="pw-dot" style="width:10px;height:10px;border-radius:50%;background:var(--text-dim);flex-shrink:0"></div>
+            <div style="flex:1">
+              <div id="pw-status" style="font-size:15px;font-weight:700">Loading...</div>
+              <div id="pw-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px"></div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2" width="16" height="16"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        </a>
+
+        <div class="card">
+          <h3 style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px">Quick Actions</h3>
+          <div class="qc-grid">
+            <div class="qc" onclick="Toast.info('Pausing store...')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span>Pause Store</span></div>
+            <div class="qc" onclick="Toast.info('Opening menu editor')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg><span>Edit Menu</span></div>
+            <div class="qc" onclick="Toast.success('Resync initiated!')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg><span>Sync POS</span></div>
+            <div class="qc" onclick="Toast.info('Opening support')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Support</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px">Store Status</h3>
+          <div class="sys-row"><div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" width="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="sys-label">Store</span></div><div class="sys-stat"><div class="dot dot-green"></div>OPEN</div></div>
+          <div class="sys-row"><div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" width="18"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg><span class="sys-label">POS Terminal</span></div><div class="sys-stat" id="pos-terminal-status"><div class="dot dot-gray"></div>CHECKING</div></div>
+          <div class="sys-row"><div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" width="18"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="sys-label">Cloud Sync</span></div><div class="sys-stat"><div class="dot dot-green"></div>SYNCED</div></div>
+        </div>
+      </div>
+    </div>
+
+    <footer style="border-top:1px solid var(--border);padding:24px 40px;display:flex;justify-content:space-between;align-items:center;margin-top:0">
+      <p style="font-weight:800">Koutix Kinetic</p>
+      <div style="display:flex;gap:24px"><a href="#" style="font-size:12px;color:var(--text-dim)">Privacy</a><a href="#" style="font-size:12px;color:var(--text-dim)">Terms</a><a href="#" style="font-size:12px;color:var(--text-dim)">Status</a></div>
+      <p style="font-size:12px;color:var(--text-dim)">&copy; 2024 Koutix Kinetic. All Rights Reserved.</p>
+    </footer>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+let allOrders = [];
+const statusMap = {
+  priority: { label: 'PRIORITY', cls: 'badge-acid' },
+  standard: { label: 'STANDARD', cls: 'badge-gray' },
+  delayed:  { label: 'DELAYED',  cls: 'badge-red' },
+};
+const actionMap = {
+  priority: '<button class="btn btn-ghost" style="font-size:12px;padding:8px 14px" onclick="updateOrder(this,\'on hold\')">Hold</button><button class="btn btn-acid" style="font-size:12px;padding:8px 14px" onclick="updateOrder(this,\'ready\')">Mark Ready</button>',
+  standard: '<button class="btn btn-acid" style="font-size:12px;padding:8px 14px" onclick="updateOrder(this,\'preparing\')">Start Prep</button>',
+  delayed:  '<button class="btn" style="font-size:12px;padding:8px 14px;background:var(--red);color:#fff" onclick="updateOrder(this,\'resolved\')">Resolve Issue</button>',
+};
+
+async function initStoreDashboard() {
+  try {
+    const res = await Backend.request('GET', '/auth/me');
+    const data = res.data || res;
+    const user = data.user || data;
+    if (user) {
+      document.getElementById('owner-name').textContent = user.name || user.storeName || 'Store Owner';
+      document.getElementById('store-title').textContent = user.storeName || 'My Store';
+      document.getElementById('store-info').textContent = (user.storeAddress || '') + (user.email ? ' \u2022 ' + user.email : '');
+    }
+  } catch(e) {
+    console.warn('Could not load user data');
+  }
+  loadStats();
+  loadOrders();
+  loadPosWidget();
+}
+
+async function loadStats() {
+  try {
+    const s = await Backend.getBranchStats();
+    const data = s.data || s;
+    document.getElementById('stat-revenue').textContent = '$' + (data.totalSales || data.revenue || 0).toLocaleString();
+    document.getElementById('stat-revenue-change').textContent = '\u2191 +' + (data.sales_change || data.salesChange || 12.4) + '% vs yesterday';
+    document.getElementById('stat-orders').textContent = data.totalOrders || data.orders || 0;
+    document.getElementById('stat-orders-sub').textContent = 'Avg $' + (data.avgOrderValue || data.avgOrder || 0).toFixed(2);
+    document.getElementById('stat-active').textContent = data.activeOrders || data.active || 0;
+    document.getElementById('stat-active-sub').textContent = (data.outForDelivery || 0) + ' out for delivery';
+  } catch(e) {
+    document.getElementById('stat-revenue').textContent = '--';
+  }
+}
+
+async function loadOrders() {
+  try {
+    const res = await Backend.getOrders();
+    allOrders = res.data || res || [];
+    renderOrders(allOrders);
+  } catch(e) {
+    document.getElementById('orders-list').innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px">Failed to load orders.</p>';
+  }
+}
+
+function renderOrders(list) {
+  const el = document.getElementById('orders-list');
+  if (!list.length) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px">No orders yet.</p>'; return; }
+  el.innerHTML = list.map(function(o) {
+    var s = statusMap[o.status] || statusMap.standard;
+    return '<div class="order-row ' + o.status + '">' +
+      '<div class="order-num ' + o.status + '">#' + o.id + '</div>' +
+      '<div class="order-info">' +
+        '<div class="order-name">' + o.customer + ' <span class="badge ' + s.cls + '" style="font-size:10px">' + s.label + '</span></div>' +
+        '<div class="order-meta">' + o.items + ' Items \u2022 $' + o.total + ' \u2022 ' + (o.ordered || o.ordered_ago || '') + '</div>' +
+      '</div>' +
+      '<div class="order-actions">' + (actionMap[o.status] || '') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function updateOrder(btn, newStatus) {
+  var row = btn.closest('.order-row');
+  var orderId = parseInt(row.querySelector('.order-num').textContent.replace('#',''));
+  var orig = btn.textContent; btn.disabled = true; btn.textContent = '\u2026';
+  try {
+    await Backend.request('PATCH', '/orders/' + orderId, { status: newStatus });
+    var o = allOrders.find(function(x) { return x.id === orderId; });
+    if (o) o.status = newStatus === 'ready' ? 'standard' : o.status;
+    Toast.success('Order #' + orderId + ' updated');
+    renderOrders(allOrders);
+  } catch(e) { btn.disabled = false; btn.textContent = orig; Toast.error('Update failed'); }
+}
+
+function filterOrders(type, el) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  renderOrders(type === 'all' ? allOrders : allOrders.filter(function(o) { return o.status === type; }));
+}
+
+async function loadPosWidget() {
+  var dot = document.getElementById('pw-dot');
+  var status = document.getElementById('pw-status');
+  var meta = document.getElementById('pw-meta');
+  var terminalStatus = document.getElementById('pos-terminal-status');
+  try {
+    var res = await fetch(KOUTIX_CONFIG.apiBase + '/pos/status', { credentials: 'include' });
+    var data = await res.json();
+    var s = data.data || {};
+    var st = s.status || 'disconnected';
+    var typeMap = { ls_retail: 'LS Retail', sap: 'SAP', custom: 'Custom' };
+
+    if (st === 'connected') {
+      dot.style.background = 'var(--acid)';
+      dot.style.boxShadow = '0 0 8px var(--acid)';
+      status.textContent = 'Connected';
+      status.style.color = 'var(--acid)';
+      meta.textContent = (typeMap[s.posType] || s.posType || '') + ' \u2022 ' + (s.method === 'api_pull' ? 'API Pull' : 'Webhook');
+      terminalStatus.innerHTML = '<div class="dot dot-green"></div>LINKED';
+    } else if (st === 'error') {
+      dot.style.background = 'var(--red)';
+      dot.style.boxShadow = '0 0 8px var(--red)';
+      status.textContent = 'Error';
+      status.style.color = 'var(--red)';
+      meta.textContent = s.lastErrorMessage || 'Connection error';
+      terminalStatus.innerHTML = '<div class="dot dot-red"></div>ERROR';
+    } else {
+      dot.style.background = 'var(--text-dim)';
+      status.textContent = 'Disconnected';
+      status.style.color = 'var(--text-muted)';
+      meta.textContent = 'Tap to connect your POS system';
+      terminalStatus.innerHTML = '<div class="dot dot-gray"></div>NOT LINKED';
+    }
+  } catch(e) {
+    status.textContent = 'Disconnected';
+    status.style.color = 'var(--text-muted)';
+    meta.textContent = 'Tap to connect your POS system';
+    terminalStatus.innerHTML = '<div class="dot dot-gray"></div>NOT LINKED';
+  }
+}
+
+initStoreDashboard();
+setInterval(function() { document.title = 'Koutix \u2014 ' + new Date().toLocaleTimeString(); }, 1000);
+</script>
+</body>
+</html>

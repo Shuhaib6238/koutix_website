@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — Profile</title>
+<link rel="stylesheet" href="../css/global.css">
+<style>
+.profile-body{padding:36px 40px;max-width:720px}
+.profile-header{display:flex;align-items:center;gap:24px;margin-bottom:40px}
+.profile-avatar{width:80px;height:80px;border-radius:16px;background:rgba(163,255,18,0.08);border:2px solid rgba(163,255,18,0.15);display:grid;place-items:center;flex-shrink:0}
+.profile-avatar svg{width:36px;height:36px;color:var(--acid)}
+.profile-name{font-size:28px;font-weight:900;letter-spacing:-0.02em}
+.profile-role{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acid);margin-top:4px}
+.profile-section{margin-bottom:32px}
+.profile-section h3{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px}
+.profile-field{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--border)}
+.profile-field:last-child{border-bottom:none}
+.field-info{display:flex;flex-direction:column;gap:2px}
+.field-label{font-size:12px;color:var(--text-muted);font-weight:600}
+.field-value{font-size:15px;font-weight:700}
+.field-value.mono{font-family:var(--font-mono);font-size:13px;color:var(--text-muted)}
+.plan-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(163,255,18,0.08);border:1px solid rgba(163,255,18,0.15);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--acid)}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div style="width:38px;height:38px;background:var(--acid);border-radius:10px;display:grid;place-items:center;margin-bottom:10px;box-shadow:0 0 20px rgba(163,255,18,0.2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" width="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div style="font-size:18px;font-weight:800">Koutix</div>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-top:2px" id="sidebar-edition">Dashboard</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" id="nav-back" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="/profile" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Profile</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>Help</a>
+      <a href="/login" onclick="Backend.logout(); return false;" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>My Profile</h2>
+        <p>Manage your account details</p>
+      </div>
+    </div>
+
+    <div class="profile-body">
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <div>
+          <div class="profile-name" id="p-name">Loading...</div>
+          <div class="profile-role" id="p-role">--</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="profile-section">
+          <h3>Account Information</h3>
+          <div class="profile-field">
+            <div class="field-info"><span class="field-label">Full Name</span><span class="field-value" id="p-fullname">--</span></div>
+          </div>
+          <div class="profile-field">
+            <div class="field-info"><span class="field-label">Email Address</span><span class="field-value" id="p-email">--</span></div>
+          </div>
+          <div class="profile-field" id="phone-row">
+            <div class="field-info"><span class="field-label">Phone</span><span class="field-value" id="p-phone">--</span></div>
+          </div>
+        </div>
+
+        <div class="profile-section" id="store-section" style="display:none">
+          <h3>Store Details</h3>
+          <div class="profile-field">
+            <div class="field-info"><span class="field-label">Store Name</span><span class="field-value" id="p-store">--</span></div>
+          </div>
+          <div class="profile-field" id="addr-row">
+            <div class="field-info"><span class="field-label">Address</span><span class="field-value" id="p-address">--</span></div>
+          </div>
+        </div>
+
+        <div class="profile-section" id="chain-section" style="display:none">
+          <h3>Business Details</h3>
+          <div class="profile-field">
+            <div class="field-info"><span class="field-label">Business Name</span><span class="field-value" id="p-business">--</span></div>
+          </div>
+        </div>
+
+        <div class="profile-section" id="plan-section" style="display:none">
+          <h3>Subscription</h3>
+          <div class="profile-field">
+            <div class="field-info"><span class="field-label">Current Plan</span><span class="field-value"><span class="plan-badge" id="p-plan">--</span></span></div>
+          </div>
+          <div class="profile-field">
+            <div class="field-info"><span class="field-label">Status</span><span class="field-value" id="p-sub-status">--</span></div>
+          </div>
+        </div>
+
+        <div class="profile-section">
+          <h3>Account</h3>
+          <div class="profile-field">
+            <div class="field-info"><span class="field-label">Member Since</span><span class="field-value mono" id="p-created">--</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+var roleLabels = {
+  superadmin: 'Super Admin',
+  chain_manager: 'Chain Manager',
+  branch_manager: 'Branch Manager',
+  store_manager: 'Store Manager',
+};
+var dashboardLinks = {
+  superadmin: '/superadmin',
+  chain_manager: '/dashboard',
+  branch_manager: '/branch-dashboard',
+  store_manager: '/store-dashboard',
+};
+
+async function loadProfile() {
+  try {
+    var res = await Backend.request('GET', '/auth/me');
+    var data = res.data || res;
+    var user = data.user || data;
+    var role = data.role || user.role || '';
+
+    // Set dashboard back link
+    var backLink = dashboardLinks[role] || '/dashboard';
+    document.getElementById('nav-back').href = backLink;
+
+    // Sidebar edition label
+    var editionMap = { superadmin: 'Platform Admin', chain_manager: 'Enterprise Edition', branch_manager: 'Branch Edition', store_manager: 'Store Manager' };
+    document.getElementById('sidebar-edition').textContent = editionMap[role] || 'Dashboard';
+
+    // Header
+    document.getElementById('p-name').textContent = user.name || user.businessName || user.storeName || 'User';
+    document.getElementById('p-role').textContent = roleLabels[role] || role;
+
+    // Account info
+    document.getElementById('p-fullname').textContent = user.name || user.businessName || '--';
+    document.getElementById('p-email').textContent = user.email || '--';
+    document.getElementById('p-phone').textContent = user.phone || 'Not set';
+
+    // Store section (store_manager)
+    if (role === 'store_manager' && user.storeName) {
+      document.getElementById('store-section').style.display = '';
+      document.getElementById('p-store').textContent = user.storeName;
+      document.getElementById('p-address').textContent = user.storeAddress || 'Not set';
+    }
+
+    // Chain section (chain_manager)
+    if (role === 'chain_manager' && user.businessName) {
+      document.getElementById('chain-section').style.display = '';
+      document.getElementById('p-business').textContent = user.businessName;
+    }
+
+    // Branch section (branch_manager)
+    if (role === 'branch_manager' && user.branchName) {
+      document.getElementById('store-section').style.display = '';
+      document.getElementById('p-store').textContent = user.branchName;
+      document.getElementById('p-address').textContent = user.branchAddress || 'Not set';
+    }
+
+    // Subscription (chain_manager, store_manager)
+    if (role === 'chain_manager' || role === 'store_manager') {
+      document.getElementById('plan-section').style.display = '';
+      document.getElementById('p-plan').textContent = (user.plan || 'basic').toUpperCase();
+      document.getElementById('p-sub-status').textContent = (user.subscriptionStatus || 'pending').replace('_', ' ').toUpperCase();
+    }
+
+    // Created date
+    if (user.createdAt) {
+      document.getElementById('p-created').textContent = new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+  } catch(e) {
+    console.error('Failed to load profile:', e);
+    Toast.error('Failed to load profile');
+  }
+}
+
+loadProfile();
+</script>
+</body>
+</html>

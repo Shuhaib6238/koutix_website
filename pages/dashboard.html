@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Koutix — Branch Dashboard</title>
+<title>Koutix — Chain Manager Dashboard</title>
 <link rel="stylesheet" href="../css/global.css">
 <style>
 .dashboard-body{padding:28px 40px;display:grid;grid-template-columns:1fr 300px;gap:24px}
@@ -41,7 +41,31 @@
 .branch-status .bname{font-size:16px;font-weight:800}
 .op-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acid)}
 .op-badge::before{content:'';width:8px;height:8px;background:var(--acid);border-radius:50%;animation:pulse-dot 2s infinite;box-shadow:0 0 6px var(--acid)}
-@media(max-width:900px){.dashboard-body{grid-template-columns:1fr}.right-col{order:-1}}
+/* Branches Section */
+.branches-section{padding:0 40px 28px}
+.branches-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.branches-header h3{font-size:20px;font-weight:800}
+.branch-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.branch-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:all .3s}
+.branch-card:hover{border-color:rgba(255,255,255,0.1);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.branch-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.branch-card-name{font-size:16px;font-weight:800;margin-bottom:2px}
+.branch-card-addr{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.branch-card-addr svg{width:12px;height:12px;flex-shrink:0}
+.branch-card-stats{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--border);margin-top:14px;padding-top:14px}
+.branch-card-stat{display:flex;flex-direction:column;gap:2px}
+.branch-card-stat:last-child{text-align:right}
+.branch-card-stat .s-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);font-weight:600}
+.branch-card-stat .s-val{font-family:var(--font-display);font-size:20px;font-weight:900;letter-spacing:-0.01em}
+.branch-card-invited{display:flex;align-items:center;gap:12px;border-top:1px solid var(--border);margin-top:14px;padding-top:14px}
+.branch-card-invited svg{width:20px;height:20px;color:var(--acid);flex-shrink:0}
+.branch-card-invited p{font-size:13px;font-weight:700}
+.branch-card-invited span{font-size:11px;color:var(--text-muted)}
+.add-branch-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(12px);z-index:500;place-items:center}
+.add-branch-modal.show{display:grid}
+.modal-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:480px;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
+.modal-title{font-size:22px;font-weight:800;margin-bottom:24px;letter-spacing:-0.01em}
+@media(max-width:900px){.dashboard-body{grid-template-columns:1fr}.right-col{order:-1}.branch-list{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -56,33 +80,34 @@
       <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-top:2px">Enterprise Edition</div>
     </div>
     <nav class="sidebar-nav">
-      <a href="dashboard.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="/dashboard" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
       <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Analytics</a>
-      <a href="chain.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Branches</a>
+      <a href="/chain" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Branches</a>
       <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/></svg>Inventory</a>
       <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l-1.41 1.41M20.49 12H22M2 12H3.51M19.07 19.07l-1.41-1.41M4.93 4.93 3.52 3.52M12 20.49V22M12 2v1.51"/></svg>Settings</a>
     </nav>
     <div class="sidebar-bottom">
       <div class="branch-status">
-        <span class="label">Current Branch</span>
-        <span class="bname">Downtown Hub 04</span>
+        <span class="label">Chain Manager</span>
+        <span class="bname" id="sidebar-name">Loading...</span>
         <div class="op-badge">Operational</div>
       </div>
+      <a href="/profile" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Profile</a>
       <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>Help</a>
-      <a href="login.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</a>
+      <a href="/login" onclick="Backend.logout(); return false;" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</a>
     </div>
   </aside>
 
   <div class="main-content">
     <div class="topbar">
       <div class="topbar-title">
-        <h2>Branch Overview</h2>
-        <p>Manager: Alex Sterling &bull; Shift: Morning</p>
+        <h2 id="dash-title">Chain Overview</h2>
+        <p id="dash-info">Loading...</p>
       </div>
       <div class="topbar-right">
         <div class="pos-status"><span class="pos-dot"></span>POS SYNC: ACTIVE</div>
         <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-        <div class="avatar" style="display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" width="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <a href="/profile" class="avatar" style="display:grid;place-items:center;text-decoration:none" title="My Profile"><svg viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" width="20"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></a>
       </div>
     </div>
 
@@ -130,6 +155,20 @@
       </div>
     </div>
 
+    <!-- Branches Section -->
+    <div class="branches-section">
+      <div class="branches-header">
+        <h3>My Branches</h3>
+        <button class="btn btn-acid" onclick="document.getElementById('add-modal').classList.add('show')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Branch
+        </button>
+      </div>
+      <div class="branch-list" id="branch-list">
+        <div style="text-align:center;padding:40px;color:var(--text-muted);grid-column:1/-1"><div class="spinner" style="margin:0 auto 12px;width:24px;height:24px"></div>Loading branches...</div>
+      </div>
+    </div>
+
     <footer style="border-top:1px solid var(--border);padding:24px 40px;display:flex;justify-content:space-between;align-items:center;margin-top:0">
       <p style="font-weight:800">Koutix Kinetic</p>
       <div style="display:flex;gap:24px"><a href="#" style="font-size:12px;color:var(--text-dim)">Privacy</a><a href="#" style="font-size:12px;color:var(--text-dim)">Terms</a><a href="#" style="font-size:12px;color:var(--text-dim)">Status</a></div>
@@ -138,9 +177,27 @@
   </div>
 </div>
 
+<!-- Add Branch Modal -->
+<div class="add-branch-modal" id="add-modal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-card">
+    <div class="modal-title">Add New Branch</div>
+    <div class="form-group" style="margin-bottom:16px"><label class="input-label">Branch Name</label><input type="text" class="input-field" id="m-name" placeholder="e.g. Paris Central"></div>
+    <div class="form-group" style="margin-bottom:16px"><label class="input-label">Address</label><input type="text" class="input-field" id="m-addr" placeholder="Street, City, Country"></div>
+    <div class="form-group" style="margin-bottom:16px"><label class="input-label">Manager Email (for invite)</label><input type="email" class="input-field" id="m-mgr" placeholder="manager@store.com"></div>
+    <div style="display:flex;gap:12px;margin-top:24px">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="document.getElementById('add-modal').classList.remove('show')">Cancel</button>
+      <button class="btn btn-acid" style="flex:1;justify-content:center" id="add-btn" onclick="addBranch()">Send Invitation</button>
+    </div>
+  </div>
+</div>
+
 <script src="../js/app.js"></script>
 <script>
+if (window.location.search.includes('checkout=success')) {
+  window.location.href = '/login';
+}
 let allOrders = [];
+let allBranches = [];
 const statusMap = {
   priority: { label: 'PRIORITY', cls: 'badge-acid' },
   standard: { label: 'STANDARD', cls: 'badge-gray' },
@@ -151,18 +208,37 @@ const actionMap = {
   standard: `<button class="btn btn-acid" style="font-size:12px;padding:8px 14px" onclick="updateOrder(this,'preparing')">Start Prep</button>`,
   delayed: `<button class="btn" style="font-size:12px;padding:8px 14px;background:var(--red);color:#fff" onclick="updateOrder(this,'resolved')">Resolve Issue</button>`,
 };
+
+// Load chain manager info
+async function loadChainInfo() {
+  try {
+    const res = await Backend.request('GET', '/auth/me');
+    const data = res.data || res;
+    const user = data.user || data;
+    if (user) {
+      document.getElementById('dash-title').textContent = (user.businessName || 'Chain') + ' Overview';
+      document.getElementById('dash-info').textContent = 'Manager: ' + (user.name || user.businessName || '') + (user.email ? ' \u2022 ' + user.email : '');
+      document.getElementById('sidebar-name').textContent = user.businessName || user.name || 'My Chain';
+    }
+  } catch(e) {
+    document.getElementById('dash-info').textContent = 'Chain Manager Dashboard';
+  }
+}
+
 async function loadStats() {
   try {
     const s = await Backend.getBranchStats();
-    document.getElementById('stat-sales').textContent = '$' + s.totalSales.toLocaleString();
-    document.getElementById('stat-prep').textContent = s.avgPrepTime + 'm';
-    document.getElementById('stat-orders').textContent = s.activeOrders;
-    document.getElementById('stat-delivery').textContent = '🚚 ' + s.outForDelivery + ' Out for delivery';
+    const data = s.data || s;
+    document.getElementById('stat-sales').textContent = '$' + (data.totalSales || 0).toLocaleString();
+    document.getElementById('stat-prep').textContent = (data.avgPrepTime || data.avgOrderValue || 0) + 'm';
+    document.getElementById('stat-orders').textContent = data.activeOrders || 0;
+    document.getElementById('stat-delivery').textContent = '\ud83d\ude9a ' + (data.outForDelivery || 0) + ' Out for delivery';
   } catch(e) {}
 }
 async function loadOrders() {
   try {
-    allOrders = await Backend.getOrders();
+    const res = await Backend.getOrders();
+    allOrders = res.data || res || [];
     renderOrders(allOrders);
   } catch(e) { document.getElementById('orders-list').innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px">Failed to load orders.</p>'; }
 }
@@ -175,7 +251,7 @@ function renderOrders(list) {
       <div class="order-num ${o.status}">#${o.id}</div>
       <div class="order-info">
         <div class="order-name">${o.customer} <span class="badge ${s.cls}" style="font-size:10px">${s.label}</span></div>
-        <div class="order-meta">${o.items} Items &bull; $${o.total} &bull; Ordered ${o.ordered}</div>
+        <div class="order-meta">${o.items} Items &bull; $${o.total} &bull; ${o.ordered || o.ordered_ago || ''}</div>
       </div>
       <div class="order-actions">${actionMap[o.status] || ''}</div>
     </div>`;
@@ -184,12 +260,12 @@ function renderOrders(list) {
 async function updateOrder(btn, newStatus) {
   const row = btn.closest('.order-row');
   const orderId = parseInt(row.querySelector('.order-num').textContent.replace('#',''));
-  const orig = btn.textContent; btn.disabled = true; btn.textContent = '…';
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = '\u2026';
   try {
-    await Backend.updateOrder(orderId, { status: newStatus });
+    await Backend.request('PATCH', '/orders/' + orderId, { status: newStatus });
     const o = allOrders.find(x => x.id === orderId);
     if (o) o.status = newStatus === 'ready' ? 'standard' : o.status;
-    Toast.success(`Order #${orderId} updated`);
+    Toast.success('Order #' + orderId + ' updated');
     renderOrders(allOrders);
   } catch(e) { btn.disabled = false; btn.textContent = orig; Toast.error('Update failed'); }
 }
@@ -198,8 +274,82 @@ function filterOrders(type, el) {
   el.classList.add('active');
   renderOrders(type === 'all' ? allOrders : allOrders.filter(o => o.status === type));
 }
-loadStats(); loadOrders();
-setInterval(() => { const now = new Date(); document.title = `Koutix — ${now.toLocaleTimeString()}`; }, 1000);
+
+// ── Branches ──────────────────────────────────────────────
+async function loadBranches() {
+  try {
+    var res = await Backend.getMyBranches();
+    allBranches = res.data || res || [];
+    renderBranches(allBranches);
+  } catch(e) {
+    document.getElementById('branch-list').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);grid-column:1/-1">Failed to load branches.</div>';
+  }
+}
+
+function renderBranches(list) {
+  var grid = document.getElementById('branch-list');
+  if (!list.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);grid-column:1/-1">No branches yet. Click <strong>Add Branch</strong> to invite your first branch manager.</div>';
+    return;
+  }
+  grid.innerHTML = list.map(function(b) {
+    var isActive = b.isActive === true;
+    var statusCls = isActive ? 'badge-acid' : 'badge-orange';
+    var statusText = isActive ? 'ACTIVE' : 'INVITED';
+
+    // Activated branch details
+    var detailsHtml = '';
+    if (isActive) {
+      var activatedDate = b.activatedAt ? new Date(b.activatedAt).toLocaleDateString() : '--';
+      detailsHtml = '<div class="branch-card-stats">' +
+        '<div class="branch-card-stat"><span class="s-label">Manager</span><span class="s-val" style="font-size:14px">' + (b.name || '--') + '</span></div>' +
+        '<div class="branch-card-stat"><span class="s-label">Activated</span><span class="s-val" style="font-size:14px">' + activatedDate + '</span></div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;padding:12px 0 0;border-top:1px solid var(--border);margin-top:12px">' +
+        '<span class="s-label" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);font-weight:600">Phone</span>' +
+        '<span style="font-size:13px;font-weight:600;color:var(--text-muted)">' + (b.phone || 'Not set') + '</span>' +
+      '</div>';
+    } else {
+      detailsHtml = '<div class="branch-card-invited">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
+        '<div><p>Pending Invitation</p><span>Sent to ' + (b.email || 'manager') + '</span></div>' +
+      '</div>';
+    }
+
+    return '<div class="branch-card">' +
+      '<div class="branch-card-head">' +
+        '<div><div class="branch-card-name">' + (b.branchName || 'Unnamed Branch') + '</div>' +
+        '<div class="branch-card-addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (b.branchAddress || '') + '</div></div>' +
+        '<span class="badge ' + statusCls + '" style="font-size:10px">' + statusText + '</span>' +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--text-muted);margin-top:8px">' + (b.email || '') + '</div>' +
+      detailsHtml +
+    '</div>';
+  }).join('');
+}
+
+async function addBranch() {
+  var btn = document.getElementById('add-btn');
+  var name = document.getElementById('m-name').value.trim();
+  var address = document.getElementById('m-addr').value.trim();
+  var email = document.getElementById('m-mgr').value.trim();
+  if (!name || !address || !email) { Toast.error('Branch name, address, and manager email are required'); return; }
+  Loader.show(btn);
+  try {
+    await Backend.inviteBranch({ branchName: name, branchAddress: address, branchEmail: email });
+    allBranches.push({ branchName: name, branchAddress: address, isActive: false, email: email });
+    renderBranches(allBranches);
+    document.getElementById('add-modal').classList.remove('show');
+    document.getElementById('m-name').value = '';
+    document.getElementById('m-addr').value = '';
+    document.getElementById('m-mgr').value = '';
+    Toast.success('Invitation sent to manager!');
+  } catch(e) { Toast.error(e.message || 'Failed to send branch invitation.'); }
+  Loader.hide(btn);
+}
+
+loadChainInfo(); loadStats(); loadOrders(); loadBranches();
+setInterval(function() { document.title = 'Koutix \u2014 ' + new Date().toLocaleTimeString(); }, 1000);
 </script>
 </body>
 </html>

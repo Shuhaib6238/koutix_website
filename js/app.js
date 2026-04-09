@@ -82,7 +82,7 @@ const Backend = {
       await this.request('POST', '/auth/logout');
     } finally {
       sessionStorage.clear();
-      window.location.href = 'login.html';
+      window.location.href = '/login';
     }
   },
 
@@ -97,6 +97,7 @@ const Backend = {
 
   // ── Data Endpoints (Mapped to Backend Models) ─────────
   getBranches: () => Backend.request('GET', '/stores'), // Backend calls them stores
+  getMyBranches: () => Backend.request('GET', '/stores/my-branches'), // Chain manager's branches
   getOrders: () => Backend.request('GET', '/orders'),
   getBranchStats: () => Backend.request('GET', '/stats/branch'),
   
@@ -107,12 +108,12 @@ const Backend = {
   getPendingStores: () => Backend.request('GET', '/admin/stores/pending'),
   
   // ── Network Operations ────────────────────────────────
-  inviteBranch: (data) => Backend.request('POST', '/auth/branch/invite', data),
+  inviteBranch: (data) => Backend.request('POST', '/auth/branch/invite', { branchName: data.branchName, branchAddress: data.branchAddress, branchEmail: data.branchEmail }),
 };
 
 const Session = {
   get() { try { return JSON.parse(sessionStorage.getItem(KOUTIX_CONFIG.userKey)); } catch { return null; } },
-  require(redirect = 'login.html') { if (!this.get()) { window.location.href = redirect; return false; } return true; },
+  require(redirect = '/login') { if (!this.get()) { window.location.href = redirect; return false; } return true; },
 };
 
 const Toast = {

@@ -376,7 +376,7 @@ body {
     </div>
 
     <div class="login-footer">
-        <span>No account? <a href="onboarding.html">Request Access</a></span>
+        <span>No account? <a href="/onboarding">Request Access</a></span>
         <span style="font-size:11px;color:var(--text-dim)">© 2024 KOUTIX KINETIC</span>
     </div>
 </div>
@@ -417,7 +417,9 @@ btn.addEventListener('click', async () => {
                 window.location.href = '/superadmin';
             } else if (role === 'branch_manager') {
                 window.location.href = '/branch-dashboard';
-            } else if (role === 'chain_manager' || role === 'store_manager') {
+            } else if (role === 'store_manager') {
+                window.location.href = '/store-dashboard';
+            } else if (role === 'chain_manager') {
                 window.location.href = '/dashboard';
             } else {
                 window.location.href = '/onboarding';

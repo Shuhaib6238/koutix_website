@@ -66,6 +66,9 @@ app.get('/dashboard', (req, res) =>
 app.get('/branch-dashboard', (req, res) =>
   res.sendFile(path.join(__dirname, 'pages', 'branch-dashboard.html')));
 
+app.get('/store-dashboard', (req, res) =>
+  res.sendFile(path.join(__dirname, 'pages', 'store-dashboard.html')));
+
 app.get('/chain', (req, res) =>
   res.sendFile(path.join(__dirname, 'pages', 'chain.html')));
 
@@ -80,6 +83,15 @@ app.get('/admin', (req, res) =>
 
 app.get('/activate', (req, res) =>
   res.sendFile(path.join(__dirname, 'pages', 'activate.html')));
+
+app.get('/pos', (req, res) =>
+  res.sendFile(path.join(__dirname, 'pages', 'pos.html')));
+
+app.get('/pos-events', (req, res) =>
+  res.sendFile(path.join(__dirname, 'pages', 'pos-events.html')));
+
+app.get('/profile', (req, res) =>
+  res.sendFile(path.join(__dirname, 'pages', 'profile.html')));
 
 // ── 404 ───────────────────────────────────────────────────
 app.use((req, res) =>

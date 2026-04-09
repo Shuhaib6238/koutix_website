@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Koutix — POS Connection</title>
+<link rel="stylesheet" href="../css/global.css">
+<style>
+.pos-body{padding:28px 40px;display:flex;flex-direction:column;gap:24px;max-width:860px}
+
+/* Status Card */
+.status-card{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.status-indicator{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;flex-shrink:0}
+.status-indicator.connected{background:rgba(163,255,18,0.1);border:1px solid rgba(163,255,18,0.25)}
+.status-indicator.error{background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.25)}
+.status-indicator.disconnected{background:rgba(255,255,255,0.03);border:1px solid var(--border)}
+.status-indicator .dot{width:14px;height:14px;border-radius:50%}
+.status-indicator.connected .dot{background:var(--acid);box-shadow:0 0 10px var(--acid);animation:pulse-dot 2s infinite}
+.status-indicator.error .dot{background:var(--red);box-shadow:0 0 10px var(--red)}
+.status-indicator.disconnected .dot{background:var(--text-dim)}
+.status-details{flex:1;min-width:200px}
+.status-title{font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px}
+.status-meta{font-size:13px;color:var(--text-muted);margin-top:4px;display:flex;flex-wrap:wrap;gap:16px}
+.status-meta span{display:flex;align-items:center;gap:6px}
+.status-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Webhook Info */
+.webhook-section{display:none}
+.webhook-section.visible{display:block}
+.wh-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.wh-row:last-child{margin-bottom:0}
+.wh-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+.wh-input-wrap{flex:1;position:relative;display:flex;align-items:center;gap:8px}
+.wh-input-wrap input{flex:1;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-mono);font-size:13px}
+.wh-input-wrap input:focus{border-color:var(--acid);box-shadow:0 0 0 3px rgba(163,255,18,0.08)}
+.btn-icon{width:38px;height:38px;display:grid;place-items:center;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all var(--transition);flex-shrink:0}
+.btn-icon:hover{border-color:var(--border-hover);background:rgba(163,255,18,0.04)}
+.btn-icon svg{width:16px;height:16px;color:var(--text-muted)}
+.copied-hint{position:absolute;right:-60px;font-size:11px;color:var(--acid);font-weight:700;opacity:0;transition:opacity .3s}
+.copied-hint.show{opacity:1}
+
+/* Connect Form */
+.connect-form{display:none}
+.connect-form.visible{display:block}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column}
+.form-group.full{grid-column:1/-1}
+.form-row{display:flex;gap:12px;align-items:flex-end}
+.form-row .form-group{flex:1}
+.error-alert{display:none;padding:14px 18px;background:rgba(255,77,77,0.08);border:1px solid rgba(255,77,77,0.2);border-radius:var(--radius-sm);color:var(--red);font-size:13px;margin-top:8px}
+.error-alert.visible{display:flex;align-items:center;gap:10px}
+.form-actions{display:flex;gap:12px;margin-top:8px}
+.cred-fields{display:contents}
+.interval-group{display:none}
+.interval-group.visible{display:flex;flex-direction:column}
+
+/* Skeleton */
+.skeleton{background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.06) 50%,rgba(255,255,255,0.03) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-line{height:16px;margin-bottom:10px;border-radius:6px}
+.skel-line.w60{width:60%}
+.skel-line.w40{width:40%}
+.skel-line.w80{width:80%}
+.skel-block{height:56px;border-radius:14px;width:56px}
+
+/* Error message block */
+.status-error-msg{margin-top:12px;padding:12px 16px;background:rgba(255,77,77,0.06);border:1px solid rgba(255,77,77,0.15);border-radius:var(--radius-sm);font-size:13px;color:var(--red);display:none}
+.status-error-msg.visible{display:block}
+
+/* Quick link */
+.quick-link{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--acid);transition:all var(--transition);padding:8px 0}
+.quick-link:hover{gap:12px}
+.quick-link svg{width:16px;height:16px;transition:transform .2s}
+.quick-link:hover svg{transform:translateX(4px)}
+
+/* Disconnect Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;place-items:center;backdrop-filter:blur(4px)}
+.modal-overlay.visible{display:grid}
+.modal-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:420px;width:90%;text-align:center;animation:fadeUp .3s ease}
+.modal-card h3{font-size:20px;font-weight:800;margin-bottom:8px}
+.modal-card p{font-size:14px;color:var(--text-muted);margin-bottom:24px;line-height:1.6}
+.modal-actions{display:flex;gap:12px;justify-content:center}
+.btn-red{background:transparent;color:var(--red);border:1px solid rgba(255,77,77,0.3);padding:12px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;transition:all var(--transition)}
+.btn-red:hover{background:rgba(255,77,77,0.1);border-color:var(--red)}
+
+/* Select styling */
+select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+
+@media(max-width:900px){
+  .pos-body{padding:20px 16px}
+  .form-grid{grid-template-columns:1fr}
+  .status-card{flex-direction:column;align-items:flex-start}
+  .status-actions{width:100%}
+  .wh-row{flex-direction:column;align-items:stretch}
+  .wh-input-wrap{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="glow-bg"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div style="width:38px;height:38px;background:var(--acid);border-radius:10px;display:grid;place-items:center;margin-bottom:10px;box-shadow:0 0 20px rgba(163,255,18,0.2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" width="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <div style="font-size:18px;font-weight:800">Koutix</div>
+      <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-top:2px">Branch Edition</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/branch-dashboard" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>My Dashboard</a>
+      <a href="/pos" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>POS Connection</a>
+      <a href="/pos-events" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Sync Events</a>
+      <a href="#" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l-1.41 1.41M20.49 12H22M2 12H3.51M19.07 19.07l-1.41-1.41M4.93 4.93 3.52 3.52M12 20.49V22M12 2v1.51"/></svg>Store Settings</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="branch-status">
+        <span class="label" style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Logged In As</span>
+        <span class="bname" id="user-name" style="font-size:16px;font-weight:800">Branch Manager</span>
+        <div class="op-badge" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acid)">Active Duty</div>
+      </div>
+      <a href="/login" onclick="Backend.logout(); return false;" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>POS Connection</h2>
+        <p>Manage your Point-of-Sale system integration</p>
+      </div>
+      <div class="topbar-right">
+        <div class="pos-status" id="topbar-status"><span class="pos-dot" id="topbar-dot"></span><span id="topbar-label">LOADING</span></div>
+      </div>
+    </div>
+
+    <div class="pos-body">
+
+      <!-- ══ SECTION A: Status Card ══ -->
+      <div class="card fade-up" id="status-section">
+        <div id="status-skeleton">
+          <div style="display:flex;align-items:center;gap:20px">
+            <div class="skeleton skel-block"></div>
+            <div style="flex:1"><div class="skeleton skel-line w60"></div><div class="skeleton skel-line w40"></div></div>
+          </div>
+        </div>
+        <div id="status-content" style="display:none">
+          <div class="status-card">
+            <div class="status-indicator disconnected" id="status-icon">
+              <div class="dot"></div>
+            </div>
+            <div class="status-details">
+              <div class="status-title">
+                <span id="status-label">Disconnected</span>
+                <span class="badge badge-gray" id="status-badge">OFFLINE</span>
+              </div>
+              <div class="status-meta">
+                <span id="meta-type" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span id="meta-type-text"></span></span>
+                <span id="meta-method" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span id="meta-method-text"></span></span>
+                <span id="meta-sync" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="meta-sync-text"></span></span>
+              </div>
+            </div>
+            <div class="status-actions" id="status-actions"></div>
+          </div>
+          <div class="status-error-msg" id="status-error"></div>
+        </div>
+      </div>
+
+      <!-- ══ SECTION B: Webhook Info ══ -->
+      <div class="card webhook-section" id="webhook-section">
+        <h3 style="font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:20px">Webhook Configuration</h3>
+        <div>
+          <div class="wh-label">Webhook URL</div>
+          <div class="wh-row">
+            <div class="wh-input-wrap">
+              <input type="text" id="wh-url" readonly placeholder="Not available">
+              <button class="btn-icon" onclick="copyField('wh-url', this)" title="Copy URL"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+            </div>
+          </div>
+          <div class="wh-label">Webhook Secret</div>
+          <div class="wh-row">
+            <div class="wh-input-wrap">
+              <input type="password" id="wh-secret" readonly placeholder="Not available">
+              <button class="btn-icon" onclick="toggleSecret()" id="wh-eye-btn" title="Reveal secret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="wh-eye-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+              <button class="btn-icon" onclick="copyField('wh-secret', this)" title="Copy secret"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECTION C: Connect Form ══ -->
+      <div class="card connect-form" id="connect-section">
+        <h3 style="font-size:20px;font-weight:800;margin-bottom:20px">Connect POS System</h3>
+        <form id="pos-form" onsubmit="return false">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="input-label">POS Type</label>
+              <select class="input-field" id="f-posType" onchange="updateFormFields()">
+                <option value="">Select POS type...</option>
+                <option value="ls_retail">LS Retail</option>
+                <option value="sap">SAP</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="input-label">Sync Method</label>
+              <select class="input-field" id="f-method" onchange="updateFormFields()">
+                <option value="">Select method...</option>
+                <option value="api_pull">API Pull</option>
+                <option value="webhook">Webhook</option>
+              </select>
+            </div>
+
+            <!-- Dynamic credential fields -->
+            <div class="cred-fields" id="cred-fields"></div>
+
+            <div class="form-group interval-group" id="interval-group">
+              <label class="input-label">Pull Interval (seconds)</label>
+              <input type="number" class="input-field" id="f-interval" value="300" min="60" max="86400" placeholder="300">
+            </div>
+          </div>
+
+          <div class="error-alert" id="form-error">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <span id="form-error-text"></span>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" id="btn-test" onclick="handleTest()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Test Connection
+            </button>
+            <button type="button" class="btn btn-acid" id="btn-connect" onclick="handleConnect()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2" width="16" height="16"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              Connect POS
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ══ SECTION D: Quick Link ══ -->
+      <div>
+        <a href="/pos-events" class="quick-link">
+          View Sync Events
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ Disconnect Modal ══ -->
+<div class="modal-overlay" id="disconnect-modal">
+  <div class="modal-card">
+    <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" width="40" height="40" style="margin-bottom:16px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <h3>Disconnect POS?</h3>
+    <p>This will stop all sync operations. You can reconnect at any time with new credentials.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-red" id="btn-confirm-disconnect" onclick="handleDisconnect()">Disconnect</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+// ── POS API Helper (bypasses /v1 prefix) ──────────────────
+async function posAPI(method, path, body = null) {
+  const res = await fetch(KOUTIX_CONFIG.apiBase + '/pos' + path, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: body ? JSON.stringify(body) : null,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Request failed');
+  return data;
+}
+
+// ── State ──────────────────────────────────────────────────
+let currentStatus = null;
+let refreshTimer = null;
+
+// ── Load Status ────────────────────────────────────────────
+async function loadStatus() {
+  try {
+    const res = await posAPI('GET', '/status');
+    currentStatus = res.data;
+    renderStatus(currentStatus);
+  } catch (e) {
+    // If 404 or no connection, show disconnected
+    currentStatus = { status: 'disconnected' };
+    renderStatus(currentStatus);
+  }
+}
+
+function renderStatus(s) {
+  document.getElementById('status-skeleton').style.display = 'none';
+  document.getElementById('status-content').style.display = 'block';
+
+  const icon = document.getElementById('status-icon');
+  const label = document.getElementById('status-label');
+  const badge = document.getElementById('status-badge');
+  const topDot = document.getElementById('topbar-dot');
+  const topLabel = document.getElementById('topbar-label');
+
+  // Reset classes
+  icon.className = 'status-indicator';
+
+  const st = s.status || 'disconnected';
+
+  if (st === 'connected') {
+    icon.classList.add('connected');
+    label.textContent = 'Connected';
+    badge.className = 'badge badge-acid';
+    badge.textContent = 'ONLINE';
+    topDot.style.background = 'var(--acid)';
+    topDot.style.boxShadow = '0 0 8px var(--acid)';
+    topLabel.textContent = 'POS CONNECTED';
+  } else if (st === 'error') {
+    icon.classList.add('error');
+    label.textContent = 'Connection Error';
+    badge.className = 'badge badge-red';
+    badge.textContent = 'ERROR';
+    topDot.style.background = 'var(--red)';
+    topDot.style.boxShadow = '0 0 8px var(--red)';
+    topLabel.textContent = 'POS ERROR';
+  } else {
+    icon.classList.add('disconnected');
+    label.textContent = 'Disconnected';
+    badge.className = 'badge badge-gray';
+    badge.textContent = 'OFFLINE';
+    topDot.style.background = 'var(--text-dim)';
+    topDot.style.boxShadow = 'none';
+    topLabel.textContent = 'POS OFFLINE';
+  }
+
+  // Meta fields
+  const metaType = document.getElementById('meta-type');
+  const metaMethod = document.getElementById('meta-method');
+  const metaSync = document.getElementById('meta-sync');
+
+  if (s.posType) {
+    metaType.style.display = 'flex';
+    document.getElementById('meta-type-text').textContent = formatPosType(s.posType);
+  } else {
+    metaType.style.display = 'none';
+  }
+
+  if (s.method) {
+    metaMethod.style.display = 'flex';
+    document.getElementById('meta-method-text').textContent = s.method === 'api_pull' ? 'API Pull' : 'Webhook';
+  } else {
+    metaMethod.style.display = 'none';
+  }
+
+  if (s.lastSyncAt) {
+    metaSync.style.display = 'flex';
+    document.getElementById('meta-sync-text').textContent = 'Last sync: ' + timeAgo(s.lastSyncAt);
+  } else {
+    metaSync.style.display = 'none';
+  }
+
+  // Error message
+  const errEl = document.getElementById('status-error');
+  if (s.lastErrorMessage) {
+    errEl.textContent = s.lastErrorMessage;
+    errEl.classList.add('visible');
+  } else {
+    errEl.classList.remove('visible');
+  }
+
+  // Actions
+  const actions = document.getElementById('status-actions');
+  if (st === 'connected' || st === 'error') {
+    actions.innerHTML = '<button class="btn-red" onclick="openModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>Disconnect</button>';
+  } else {
+    actions.innerHTML = '';
+  }
+
+  // Show/hide sections
+  const isConnected = st === 'connected' || st === 'error';
+  document.getElementById('connect-section').classList.toggle('visible', !isConnected);
+
+  // Webhook info
+  const whSection = document.getElementById('webhook-section');
+  if (isConnected && s.method === 'webhook') {
+    whSection.classList.add('visible');
+    const storedUrl = sessionStorage.getItem('koutix_wh_url');
+    const storedSecret = sessionStorage.getItem('koutix_wh_secret');
+    if (storedUrl) document.getElementById('wh-url').value = storedUrl;
+    if (storedSecret) document.getElementById('wh-secret').value = storedSecret;
+  } else {
+    whSection.classList.remove('visible');
+  }
+}
+
+// ── Form Field Rendering ───────────────────────────────────
+function updateFormFields() {
+  const posType = document.getElementById('f-posType').value;
+  const method = document.getElementById('f-method').value;
+  const container = document.getElementById('cred-fields');
+  const intervalGroup = document.getElementById('interval-group');
+
+  // Show interval only for api_pull
+  intervalGroup.classList.toggle('visible', method === 'api_pull');
+
+  let html = '';
+
+  if (posType === 'ls_retail' && method === 'api_pull') {
+    html = `
+      <div class="form-group full">
+        <label class="input-label">Base URL</label>
+        <input type="url" class="input-field" id="f-baseUrl" placeholder="https://api.lsretail.com/v1" required>
+      </div>
+      <div class="form-group full">
+        <label class="input-label">API Key</label>
+        <input type="password" class="input-field" id="f-apiKey" placeholder="Enter your API key">
+      </div>
+      <div class="form-group">
+        <label class="input-label">Username (optional)</label>
+        <input type="text" class="input-field" id="f-username" placeholder="Username">
+      </div>
+      <div class="form-group">
+        <label class="input-label">Password (optional)</label>
+        <input type="password" class="input-field" id="f-password" placeholder="Password">
+      </div>`;
+  } else if (posType === 'ls_retail' && method === 'webhook') {
+    html = `
+      <div class="form-group full">
+        <label class="input-label">Base URL</label>
+        <input type="url" class="input-field" id="f-baseUrl" placeholder="https://api.lsretail.com/v1">
+      </div>`;
+  } else if (posType === 'sap' && method === 'webhook') {
+    html = `
+      <div class="form-group full">
+        <label class="input-label">SAP Server URL (optional)</label>
+        <input type="url" class="input-field" id="f-sapServerUrl" placeholder="https://sap-server.example.com/callback">
+      </div>`;
+  } else if (posType === 'sap' && method === 'api_pull') {
+    html = `
+      <div class="form-group full">
+        <label class="input-label">Base URL</label>
+        <input type="url" class="input-field" id="f-baseUrl" placeholder="https://sap-api.example.com" required>
+      </div>
+      <div class="form-group">
+        <label class="input-label">Username</label>
+        <input type="text" class="input-field" id="f-username" placeholder="SAP Username">
+      </div>
+      <div class="form-group">
+        <label class="input-label">Password</label>
+        <input type="password" class="input-field" id="f-password" placeholder="SAP Password">
+      </div>`;
+  } else if (posType === 'custom') {
+    html = `
+      <div class="form-group full">
+        <label class="input-label">Base URL</label>
+        <input type="url" class="input-field" id="f-baseUrl" placeholder="https://your-pos-api.com" required>
+      </div>
+      <div class="form-group full">
+        <label class="input-label">API Key</label>
+        <input type="password" class="input-field" id="f-apiKey" placeholder="Enter API key">
+      </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function gatherCredentials() {
+  const creds = {};
+  const fields = ['baseUrl', 'apiKey', 'username', 'password', 'sapServerUrl'];
+  fields.forEach(f => {
+    const el = document.getElementById('f-' + f);
+    if (el && el.value.trim()) creds[f] = el.value.trim();
+  });
+  return creds;
+}
+
+function validateForm() {
+  const posType = document.getElementById('f-posType').value;
+  const method = document.getElementById('f-method').value;
+  if (!posType) return 'Please select a POS type';
+  if (!method) return 'Please select a sync method';
+  const creds = gatherCredentials();
+  if (posType !== 'sap' && method === 'api_pull' && !creds.baseUrl && !creds.apiKey) {
+    return 'Please provide at least a Base URL or API Key';
+  }
+  return null;
+}
+
+// ── Test Connection ────────────────────────────────────────
+async function handleTest() {
+  const err = validateForm();
+  if (err) { showFormError(err); return; }
+  hideFormError();
+
+  const btn = document.getElementById('btn-test');
+  Loader.show(btn);
+  try {
+    const res = await posAPI('POST', '/test', {
+      posType: document.getElementById('f-posType').value,
+      method: document.getElementById('f-method').value,
+      credentials: gatherCredentials(),
+    });
+    if (res.data && res.data.success) {
+      Toast.success(res.data.message || 'Connection test passed!');
+    } else {
+      Toast.error(res.data?.message || 'Test failed');
+    }
+  } catch (e) {
+    showFormError(e.message);
+    Toast.error('Test failed: ' + e.message);
+  } finally {
+    Loader.hide(btn);
+  }
+}
+
+// ── Connect POS ────────────────────────────────────────────
+async function handleConnect() {
+  const err = validateForm();
+  if (err) { showFormError(err); return; }
+  hideFormError();
+
+  const btn = document.getElementById('btn-connect');
+  Loader.show(btn);
+  try {
+    const body = {
+      posType: document.getElementById('f-posType').value,
+      method: document.getElementById('f-method').value,
+      credentials: gatherCredentials(),
+    };
+    if (body.method === 'api_pull') {
+      body.pullIntervalSeconds = parseInt(document.getElementById('f-interval').value) || 300;
+    }
+
+    const res = await posAPI('POST', '/connect', body);
+    Toast.success(res.message || 'POS connected successfully!');
+
+    // Store webhook info if present
+    if (res.data) {
+      if (res.data.webhookUrl) sessionStorage.setItem('koutix_wh_url', res.data.webhookUrl);
+      if (res.data.webhookSecret) sessionStorage.setItem('koutix_wh_secret', res.data.webhookSecret);
+    }
+
+    // Clear form credentials
+    document.getElementById('pos-form').reset();
+    document.getElementById('cred-fields').innerHTML = '';
+
+    await loadStatus();
+  } catch (e) {
+    showFormError(e.message);
+    Toast.error('Connection failed: ' + e.message);
+  } finally {
+    Loader.hide(btn);
+  }
+}
+
+// ── Disconnect ─────────────────────────────────────────────
+async function handleDisconnect() {
+  const btn = document.getElementById('btn-confirm-disconnect');
+  Loader.show(btn);
+  try {
+    await posAPI('DELETE', '/disconnect');
+    Toast.success('POS disconnected');
+    sessionStorage.removeItem('koutix_wh_url');
+    sessionStorage.removeItem('koutix_wh_secret');
+    closeModal();
+    await loadStatus();
+  } catch (e) {
+    Toast.error('Disconnect failed: ' + e.message);
+  } finally {
+    Loader.hide(btn);
+  }
+}
+
+// ── Modal ──────────────────────────────────────────────────
+function openModal() { document.getElementById('disconnect-modal').classList.add('visible'); }
+function closeModal() { document.getElementById('disconnect-modal').classList.remove('visible'); }
+document.getElementById('disconnect-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+// ── Webhook helpers ────────────────────────────────────────
+function copyField(id, btn) {
+  const el = document.getElementById(id);
+  const val = el.type === 'password' ? el.value : el.value;
+  if (!val) return;
+  navigator.clipboard.writeText(val).then(() => {
+    Toast.success('Copied to clipboard');
+  });
+}
+
+let secretVisible = false;
+function toggleSecret() {
+  const el = document.getElementById('wh-secret');
+  secretVisible = !secretVisible;
+  el.type = secretVisible ? 'text' : 'password';
+}
+
+// ── Form error ─────────────────────────────────────────────
+function showFormError(msg) {
+  document.getElementById('form-error-text').textContent = msg;
+  document.getElementById('form-error').classList.add('visible');
+}
+function hideFormError() {
+  document.getElementById('form-error').classList.remove('visible');
+}
+
+// ── Utilities ──────────────────────────────────────────────
+function formatPosType(t) {
+  const map = { ls_retail: 'LS Retail', sap: 'SAP', custom: 'Custom' };
+  return map[t] || t;
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return 'Never';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  return days + 'd ago';
+}
+
+// ── Init ───────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await Backend.request('GET', '/auth/me');
+    if (res.data?.name) document.getElementById('user-name').textContent = res.data.name;
+  } catch (e) {}
+
+  await loadStatus();
+  refreshTimer = setInterval(loadStatus, 15000);
+}
+
+// Cleanup on unload
+window.addEventListener('beforeunload', () => {
+  if (refreshTimer) clearInterval(refreshTimer);
+});
+
+init();
+</script>
+</body>
+</html>
