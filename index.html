@@ -64,6 +64,11 @@
   font-weight: 800;
   font-size: 20px;
   letter-spacing: -0.02em;
+  color: var(--acid);
+  transition: opacity 0.3s;
+}
+.lp-nav-logo:hover {
+  opacity: 0.8;
 }
 .lp-logo-mark {
   width: 36px; height: 36px;
@@ -355,10 +360,17 @@
 .lp-trust-logos {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 60px;
-  flex-wrap: wrap;
   opacity: 0.35;
+  overflow: hidden;
+  position: relative;
+  animation: lp-scroll-left 40s linear infinite;
+  mask-image: linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 15%, black 85%, transparent 100%);
+}
+@keyframes lp-scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 .lp-trust-item {
   font-family: 'Inter', sans-serif;
@@ -366,6 +378,8 @@
   font-weight: 800;
   letter-spacing: 0.05em;
   color: var(--text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ── SECTION COMMON ─────────────────────────────────── */
@@ -850,9 +864,6 @@
 <!-- ═══ NAVBAR ═══ -->
 <nav class="lp-nav" id="lp-topnav">
   <a href="/" class="lp-nav-logo">
-    <div class="lp-logo-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" width="18"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-    </div>
     Koutix
   </a>
   <div class="lp-nav-links">
@@ -881,7 +892,6 @@
       <p class="lp-hero-sub">Transform your supermarket into a frictionless shopping experience. AI-powered vision meets seamless inventory management.</p>
       <div class="lp-hero-cta">
         <a href="/login" class="lp-btn lp-btn-primary lp-btn-lg">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           Start Free Trial
         </a>
         <button class="lp-btn lp-btn-ghost lp-btn-lg" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
@@ -911,6 +921,11 @@
 <div class="lp-trust">
   <div class="lp-trust-label">Trusted by forward-thinking retailers worldwide</div>
   <div class="lp-trust-logos">
+    <span class="lp-trust-item">FRESHMART</span>
+    <span class="lp-trust-item">URBANGROCER</span>
+    <span class="lp-trust-item">QUICKSTOP</span>
+    <span class="lp-trust-item">GREENBASKET</span>
+    <span class="lp-trust-item">METROFOODS</span>
     <span class="lp-trust-item">FRESHMART</span>
     <span class="lp-trust-item">URBANGROCER</span>
     <span class="lp-trust-item">QUICKSTOP</span>
@@ -1064,9 +1079,6 @@
   <div class="lp-footer-grid">
     <div class="lp-footer-brand">
       <div class="lp-nav-logo" style="margin-bottom:4px">
-        <div class="lp-logo-mark" style="width:32px;height:32px;box-shadow:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#050505" stroke-width="2.5" width="17"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
         Koutix
       </div>
       <p>The next generation of autonomous retail technology for the modern world.</p>

@@ -5,7 +5,7 @@
 // ── CONFIG ──────────────────────────────────────────────
 const KOUTIX_CONFIG = {
   // Local Backend API base (Port 5000 as per server.js)
-  apiBase: 'http://localhost:5000/api',
+  apiBase: 'https://koutix-backend-1.onrender.com',
   // Firebase Web SDK Config (Update with your real API Key)
   firebase: {
   apiKey: "AIzaSyAThZnQ4mOykeLsSkFuwG-zXVMwfei0AM4",
@@ -98,6 +98,7 @@ const Backend = {
   // ── Data Endpoints (Mapped to Backend Models) ─────────
   getBranches: () => Backend.request('GET', '/stores'), // Backend calls them stores
   getMyBranches: () => Backend.request('GET', '/stores/my-branches'), // Chain manager's branches
+  getBranchSales: () => Backend.request('GET', '/stores/branch-sales'), // Sales stats for chain manager
   getOrders: () => Backend.request('GET', '/orders'),
   getBranchStats: () => Backend.request('GET', '/stats/branch'),
   
@@ -106,9 +107,18 @@ const Backend = {
   getAllChains:    () => Backend.request('GET', '/admin/chains'),
   getAllUsers:      () => Backend.request('GET', '/admin/users'),
   getPendingStores: () => Backend.request('GET', '/admin/stores/pending'),
-  
+  getAdminStores:   (params = '') => Backend.request('GET', `/admin/stores${params}`),
+  getAdminOrders:   (params = '') => Backend.request('GET', `/admin/orders${params}`),
+  getStoreDetail:   (id) => Backend.request('GET', `/stores/${id}`),
+  approveStore:     (id) => Backend.request('PATCH', `/admin/stores/${id}/approve`),
+  rejectStore:      (id, reason) => Backend.request('PATCH', `/admin/stores/${id}/reject`, { reason }),
+  suspendStore:     (id) => Backend.request('PATCH', `/admin/stores/${id}/suspend`),
+
   // ── Network Operations ────────────────────────────────
   inviteBranch: (data) => Backend.request('POST', '/auth/branch/invite', { branchName: data.branchName, branchAddress: data.branchAddress, branchEmail: data.branchEmail }),
+
+  // ── Profile ───────────────────────────────────────────
+  updateProfile: (data) => Backend.request('PATCH', '/auth/me', data),
 };
 
 const Session = {

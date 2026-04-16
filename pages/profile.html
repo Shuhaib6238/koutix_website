@@ -12,14 +12,23 @@
 .profile-name{font-size:28px;font-weight:900;letter-spacing:-0.02em}
 .profile-role{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acid);margin-top:4px}
 .profile-section{margin-bottom:32px}
-.profile-section h3{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px}
+.profile-section h3{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
 .profile-field{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--border)}
 .profile-field:last-child{border-bottom:none}
-.field-info{display:flex;flex-direction:column;gap:2px}
+.field-info{display:flex;flex-direction:column;gap:4px;flex:1}
 .field-label{font-size:12px;color:var(--text-muted);font-weight:600}
 .field-value{font-size:15px;font-weight:700}
 .field-value.mono{font-family:var(--font-mono);font-size:13px;color:var(--text-muted)}
+.field-input{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:14px;font-weight:600;font-family:var(--font-body);width:100%;transition:border-color 0.2s;display:none}
+.field-input:focus{outline:none;border-color:rgba(163,255,18,0.4)}
+.field-input.visible{display:block}
 .plan-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:rgba(163,255,18,0.08);border:1px solid rgba(163,255,18,0.15);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--acid)}
+.edit-toggle{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acid);cursor:pointer;display:flex;align-items:center;gap:6px;background:rgba(163,255,18,0.06);border:1px solid rgba(163,255,18,0.12);border-radius:8px;padding:6px 12px;transition:all .2s}
+.edit-toggle:hover{background:rgba(163,255,18,0.1)}
+.edit-toggle svg{width:13px;height:13px}
+.edit-actions{display:none;gap:10px;margin-top:20px}
+.edit-actions.visible{display:flex}
+.field-email-note{font-size:11px;color:var(--text-dim);margin-top:2px}
 </style>
 </head>
 <body>
@@ -63,36 +72,93 @@
       </div>
 
       <div class="card">
+        <!-- ── Account Information ── -->
         <div class="profile-section">
-          <h3>Account Information</h3>
-          <div class="profile-field">
-            <div class="field-info"><span class="field-label">Full Name</span><span class="field-value" id="p-fullname">--</span></div>
+          <h3>
+            Account Information
+            <button class="edit-toggle" id="edit-btn" onclick="toggleEdit()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </button>
+          </h3>
+
+          <!-- Name / Business Name -->
+          <div class="profile-field" id="row-name">
+            <div class="field-info">
+              <span class="field-label" id="label-name">Full Name</span>
+              <span class="field-value" id="p-fullname">--</span>
+              <input type="text" class="field-input" id="input-name" placeholder="Enter name">
+            </div>
           </div>
+
+          <!-- Email (read-only) -->
           <div class="profile-field">
-            <div class="field-info"><span class="field-label">Email Address</span><span class="field-value" id="p-email">--</span></div>
+            <div class="field-info">
+              <span class="field-label">Email Address</span>
+              <span class="field-value" id="p-email">--</span>
+              <span class="field-email-note" id="email-note" style="display:none">Email cannot be changed</span>
+            </div>
           </div>
-          <div class="profile-field" id="phone-row">
-            <div class="field-info"><span class="field-label">Phone</span><span class="field-value" id="p-phone">--</span></div>
+
+          <!-- Phone -->
+          <div class="profile-field" id="row-phone">
+            <div class="field-info">
+              <span class="field-label">Phone</span>
+              <span class="field-value" id="p-phone">--</span>
+              <input type="tel" class="field-input" id="input-phone" placeholder="Enter phone number">
+            </div>
           </div>
         </div>
 
+        <!-- ── Store Details (store_manager) ── -->
         <div class="profile-section" id="store-section" style="display:none">
           <h3>Store Details</h3>
           <div class="profile-field">
-            <div class="field-info"><span class="field-label">Store Name</span><span class="field-value" id="p-store">--</span></div>
+            <div class="field-info">
+              <span class="field-label">Store Name</span>
+              <span class="field-value" id="p-store">--</span>
+              <input type="text" class="field-input" id="input-storeName" placeholder="Enter store name">
+            </div>
           </div>
-          <div class="profile-field" id="addr-row">
-            <div class="field-info"><span class="field-label">Address</span><span class="field-value" id="p-address">--</span></div>
+          <div class="profile-field">
+            <div class="field-info">
+              <span class="field-label">Address</span>
+              <span class="field-value" id="p-address">--</span>
+              <input type="text" class="field-input" id="input-storeAddress" placeholder="Enter address">
+            </div>
           </div>
         </div>
 
+        <!-- ── Business Details (chain_manager) ── -->
         <div class="profile-section" id="chain-section" style="display:none">
           <h3>Business Details</h3>
           <div class="profile-field">
-            <div class="field-info"><span class="field-label">Business Name</span><span class="field-value" id="p-business">--</span></div>
+            <div class="field-info">
+              <span class="field-label">Business Name</span>
+              <span class="field-value" id="p-business">--</span>
+              <input type="text" class="field-input" id="input-businessName" placeholder="Enter business name">
+            </div>
           </div>
         </div>
 
+        <!-- ── Branch Details (branch_manager) ── -->
+        <div class="profile-section" id="branch-section" style="display:none">
+          <h3>Branch Details</h3>
+          <div class="profile-field">
+            <div class="field-info">
+              <span class="field-label">Branch Name</span>
+              <span class="field-value" id="p-branch">--</span>
+            </div>
+          </div>
+          <div class="profile-field">
+            <div class="field-info">
+              <span class="field-label">Branch Address</span>
+              <span class="field-value" id="p-branch-addr">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Subscription ── -->
         <div class="profile-section" id="plan-section" style="display:none">
           <h3>Subscription</h3>
           <div class="profile-field">
@@ -103,11 +169,21 @@
           </div>
         </div>
 
+        <!-- ── Account ── -->
         <div class="profile-section">
           <h3>Account</h3>
           <div class="profile-field">
             <div class="field-info"><span class="field-label">Member Since</span><span class="field-value mono" id="p-created">--</span></div>
           </div>
+        </div>
+
+        <!-- ── Edit Actions ── -->
+        <div class="edit-actions" id="edit-actions">
+          <button class="btn btn-acid" id="save-btn" onclick="saveProfile()" style="flex:1;justify-content:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15"><polyline points="20 6 9 17 4 12"/></svg>
+            Save Changes
+          </button>
+          <button class="btn btn-ghost" onclick="cancelEdit()" style="flex:1;justify-content:center">Cancel</button>
         </div>
       </div>
     </div>
@@ -116,6 +192,9 @@
 
 <script src="../js/app.js"></script>
 <script>
+var currentRole = '';
+var currentUser = {};
+
 var roleLabels = {
   superadmin: 'Super Admin',
   chain_manager: 'Chain Manager',
@@ -134,60 +213,142 @@ async function loadProfile() {
     var res = await Backend.request('GET', '/auth/me');
     var data = res.data || res;
     var user = data.user || data;
-    var role = data.role || user.role || '';
+    currentRole = data.role || user.role || '';
+    currentUser = user;
 
-    // Set dashboard back link
-    var backLink = dashboardLinks[role] || '/dashboard';
-    document.getElementById('nav-back').href = backLink;
+    document.getElementById('nav-back').href = dashboardLinks[currentRole] || '/dashboard';
 
-    // Sidebar edition label
     var editionMap = { superadmin: 'Platform Admin', chain_manager: 'Enterprise Edition', branch_manager: 'Branch Edition', store_manager: 'Store Manager' };
-    document.getElementById('sidebar-edition').textContent = editionMap[role] || 'Dashboard';
+    document.getElementById('sidebar-edition').textContent = editionMap[currentRole] || 'Dashboard';
 
-    // Header
-    document.getElementById('p-name').textContent = user.name || user.businessName || user.storeName || 'User';
-    document.getElementById('p-role').textContent = roleLabels[role] || role;
-
-    // Account info
-    document.getElementById('p-fullname').textContent = user.name || user.businessName || '--';
-    document.getElementById('p-email').textContent = user.email || '--';
-    document.getElementById('p-phone').textContent = user.phone || 'Not set';
-
-    // Store section (store_manager)
-    if (role === 'store_manager' && user.storeName) {
-      document.getElementById('store-section').style.display = '';
-      document.getElementById('p-store').textContent = user.storeName;
-      document.getElementById('p-address').textContent = user.storeAddress || 'Not set';
-    }
-
-    // Chain section (chain_manager)
-    if (role === 'chain_manager' && user.businessName) {
-      document.getElementById('chain-section').style.display = '';
-      document.getElementById('p-business').textContent = user.businessName;
-    }
-
-    // Branch section (branch_manager)
-    if (role === 'branch_manager' && user.branchName) {
-      document.getElementById('store-section').style.display = '';
-      document.getElementById('p-store').textContent = user.branchName;
-      document.getElementById('p-address').textContent = user.branchAddress || 'Not set';
-    }
-
-    // Subscription (chain_manager, store_manager)
-    if (role === 'chain_manager' || role === 'store_manager') {
-      document.getElementById('plan-section').style.display = '';
-      document.getElementById('p-plan').textContent = (user.plan || 'basic').toUpperCase();
-      document.getElementById('p-sub-status').textContent = (user.subscriptionStatus || 'pending').replace('_', ' ').toUpperCase();
-    }
-
-    // Created date
-    if (user.createdAt) {
-      document.getElementById('p-created').textContent = new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
+    renderProfile(user, currentRole);
   } catch(e) {
     console.error('Failed to load profile:', e);
     Toast.error('Failed to load profile');
   }
+}
+
+function renderProfile(user, role) {
+  // Header
+  document.getElementById('p-name').textContent = user.name || user.businessName || user.storeName || 'User';
+  document.getElementById('p-role').textContent = roleLabels[role] || role;
+
+  // Account info
+  var nameLabel = role === 'chain_manager' ? 'Business Name' : 'Full Name';
+  document.getElementById('label-name').textContent = nameLabel;
+  var nameVal = user.name || user.businessName || '--';
+  document.getElementById('p-fullname').textContent = nameVal;
+  document.getElementById('input-name').value = nameVal !== '--' ? nameVal : '';
+
+  document.getElementById('p-email').textContent = user.email || '--';
+
+  var phoneVal = user.phone || 'Not set';
+  document.getElementById('p-phone').textContent = phoneVal;
+  document.getElementById('input-phone').value = user.phone || '';
+
+  // Role-specific sections
+  if (role === 'store_manager') {
+    document.getElementById('store-section').style.display = '';
+    document.getElementById('p-store').textContent = user.storeName || '--';
+    document.getElementById('p-address').textContent = user.storeAddress || 'Not set';
+    document.getElementById('input-storeName').value = user.storeName || '';
+    document.getElementById('input-storeAddress').value = user.storeAddress || '';
+  }
+
+  if (role === 'chain_manager') {
+    document.getElementById('chain-section').style.display = '';
+    document.getElementById('p-business').textContent = user.businessName || '--';
+    document.getElementById('input-businessName').value = user.businessName || '';
+    // For chain_manager the "name" row shows businessName — hide duplicate
+    document.getElementById('row-name').style.display = 'none';
+  }
+
+  if (role === 'branch_manager') {
+    document.getElementById('branch-section').style.display = '';
+    document.getElementById('p-branch').textContent = user.branchName || '--';
+    document.getElementById('p-branch-addr').textContent = user.branchAddress || 'Not set';
+  }
+
+  if (role === 'chain_manager' || role === 'store_manager') {
+    document.getElementById('plan-section').style.display = '';
+    document.getElementById('p-plan').textContent = (user.plan || 'basic').toUpperCase();
+    document.getElementById('p-sub-status').textContent = (user.subscriptionStatus || 'pending').replace('_', ' ').toUpperCase();
+  }
+
+  // Superadmin has no editable fields — hide edit button
+  if (role === 'superadmin') {
+    document.getElementById('edit-btn').style.display = 'none';
+  }
+
+  if (user.createdAt) {
+    document.getElementById('p-created').textContent = new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+}
+
+function toggleEdit() {
+  var inputs = document.querySelectorAll('.field-input');
+  var values = document.querySelectorAll('.field-value');
+  inputs.forEach(function(el) { el.classList.add('visible'); });
+  values.forEach(function(el) { el.style.display = 'none'; });
+  document.getElementById('email-note').style.display = '';
+  document.getElementById('edit-actions').classList.add('visible');
+  document.getElementById('edit-btn').style.display = 'none';
+}
+
+function cancelEdit() {
+  var inputs = document.querySelectorAll('.field-input');
+  var values = document.querySelectorAll('.field-value');
+  inputs.forEach(function(el) { el.classList.remove('visible'); });
+  values.forEach(function(el) { el.style.display = ''; });
+  document.getElementById('email-note').style.display = 'none';
+  document.getElementById('edit-actions').classList.remove('visible');
+  document.getElementById('edit-btn').style.display = '';
+  // Reset inputs to current values
+  renderProfile(currentUser, currentRole);
+}
+
+async function saveProfile() {
+  var btn = document.getElementById('save-btn');
+  var payload = {};
+
+  if (currentRole === 'chain_manager') {
+    var biz = document.getElementById('input-businessName').value.trim();
+    var phone = document.getElementById('input-phone').value.trim();
+    if (biz) payload.businessName = biz;
+    if (phone) payload.phone = phone;
+  } else if (currentRole === 'branch_manager') {
+    var name = document.getElementById('input-name').value.trim();
+    var phone = document.getElementById('input-phone').value.trim();
+    if (name) payload.name = name;
+    if (phone) payload.phone = phone;
+  } else if (currentRole === 'store_manager') {
+    var name = document.getElementById('input-name').value.trim();
+    var phone = document.getElementById('input-phone').value.trim();
+    var storeName = document.getElementById('input-storeName').value.trim();
+    var storeAddress = document.getElementById('input-storeAddress').value.trim();
+    if (name) payload.name = name;
+    if (phone) payload.phone = phone;
+    if (storeName) payload.storeName = storeName;
+    if (storeAddress) payload.storeAddress = storeAddress;
+  }
+
+  if (!Object.keys(payload).length) {
+    Toast.error('No changes to save');
+    return;
+  }
+
+  Loader.show(btn);
+  try {
+    var res = await Backend.updateProfile(payload);
+    var updated = (res.data && res.data.user) ? res.data.user : res.data || res;
+    currentUser = Object.assign({}, currentUser, updated);
+    cancelEdit();
+    renderProfile(currentUser, currentRole);
+    Toast.success('Profile updated successfully');
+  } catch(e) {
+    Toast.error(e.message || 'Failed to update profile');
+  }
+  Loader.hide(btn);
 }
 
 loadProfile();

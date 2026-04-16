@@ -93,6 +93,9 @@ app.get('/pos-events', (req, res) =>
 app.get('/profile', (req, res) =>
   res.sendFile(path.join(__dirname, 'pages', 'profile.html')));
 
+app.get('/superadmin', (req, res) =>
+  res.sendFile(path.join(__dirname, 'pages', 'superadmin.html')));
+
 // ── 404 ───────────────────────────────────────────────────
 app.use((req, res) =>
   res.status(404).sendFile(path.join(__dirname, 'pages', '404.html')));

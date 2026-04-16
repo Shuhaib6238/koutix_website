@@ -210,7 +210,7 @@ tr:hover td { background: rgba(255,255,255,0.01); }
 const user = Session.get();
 if (!Session.require() || (user && user.role !== 'superadmin')) {
     Toast.error('Access Denied. Institutional credentials required.');
-    setTimeout(() => window.location.href = 'login.html', 1500);
+    setTimeout(() => window.location.href = '/login', 1500);
 }
 
 async function refreshDashboard() {

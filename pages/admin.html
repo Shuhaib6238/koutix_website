@@ -85,6 +85,30 @@ tr:hover td{background:rgba(255,255,255,0.01)}
 .toggle.off::after{right:auto;left:4px}
 .qr-sidebar-btn{padding:12px 14px;background:var(--acid);border-radius:var(--radius-sm);color:var(--black);font-size:12px;font-weight:800;letter-spacing:.06em;text-align:center;cursor:pointer;margin-bottom:12px;transition:all 0.3s;box-shadow:0 0 16px rgba(163,255,18,0.15)}
 .qr-sidebar-btn:hover{background:#b8ff3a;box-shadow:0 0 30px rgba(163,255,18,0.3)}
+.store-detail-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);z-index:500;place-items:center}
+.store-detail-modal.show{display:grid}
+.store-detail-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
+.store-detail-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:30px;border-bottom:1px solid var(--border);padding-bottom:20px}
+.store-detail-header h2{font-size:24px;font-weight:800;letter-spacing:-0.02em}
+.close-btn{background:none;border:none;color:var(--text-muted);font-size:24px;cursor:pointer;padding:0;width:32px;height:32px;display:grid;place-items:center}
+.close-btn:hover{color:var(--text)}
+.detail-section{margin-bottom:24px}
+.detail-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.detail-value{font-size:14px;color:var(--text);line-height:1.6}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.detail-actions{display:flex;gap:12px;margin-top:30px;border-top:1px solid var(--border);padding-top:20px}
+.detail-actions button{flex:1;padding:12px;border-radius:10px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s}
+.detail-actions .btn-approve{background:rgba(163,255,18,0.1);color:var(--acid);border:1px solid rgba(163,255,18,0.2)}
+.detail-actions .btn-approve:hover{background:rgba(163,255,18,0.2)}
+.detail-actions .btn-suspend{background:rgba(255,77,77,0.06);color:var(--red);border:1px solid rgba(255,77,77,0.2)}
+.detail-actions .btn-suspend:hover{background:rgba(255,77,77,0.12)}
+.store-clickable{cursor:pointer}
+.store-clickable:hover{background:rgba(163,255,18,0.02)!important}
+.tab-section{display:none}
+.tab-section.active{display:block}
+.nav-item{cursor:pointer;transition:all 0.2s}
+.nav-item:hover{background:rgba(163,255,18,0.05);color:var(--acid)}
+.nav-item.active{background:rgba(163,255,18,0.1);color:var(--acid);border-left:3px solid var(--acid);padding-left:calc(12px - 3px)}
 @media(max-width:900px){.admin-sidebar{display:none}.admin-main{margin-left:0}.admin-content{grid-template-columns:1fr}.kpi-row{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
@@ -97,15 +121,15 @@ tr:hover td{background:rgba(255,255,255,0.01)}
       <p>Retail SaaS v2.4</p>
     </div>
     <nav style="flex:1;padding:12px;display:flex;flex-direction:column;gap:2px">
-      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Platform Stats</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Stores</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Users</div>
-      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l-1.41 1.41M20.49 12H22M2 12H3.51M19.07 19.07l-1.41-1.41M4.93 4.93 3.52 3.52M12 20.49V22M12 2v1.51"/></svg>Settings</div>
+      <div class="nav-item active" onclick="switchTab('stats', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Platform Stats</div>
+      <div class="nav-item" onclick="switchTab('stores', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Stores</div>
+      <div class="nav-item" onclick="switchTab('users', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Users</div>
+      <div class="nav-item" onclick="switchTab('settings', this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l-1.41 1.41M20.49 12H22M2 12H3.51M19.07 19.07l-1.41-1.41M4.93 4.93 3.52 3.52M12 20.49V22M12 2v1.51"/></svg>Settings</div>
     </nav>
     <div style="padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px">
       <div class="qr-sidebar-btn" onclick="Toast.info('Generating quick report…')">QUICK REPORT</div>
       <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>Support</div>
-      <a href="login.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log Out</a>
+      <a href="/login" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log Out</a>
     </div>
   </aside>
 
@@ -127,6 +151,7 @@ tr:hover td{background:rgba(255,255,255,0.01)}
     </div>
 
     <!-- CONTENT -->
+    <div class="tab-section active" id="tab-stats">
     <div class="admin-content">
       <div class="admin-center">
         <!-- KPIs -->
@@ -227,6 +252,84 @@ tr:hover td{background:rgba(255,255,255,0.01)}
         </div>
       </div>
     </div>
+    </div>
+    </div>
+
+    <!-- STORES TAB -->
+    <div class="tab-section" id="tab-stores">
+      <div class="admin-content">
+        <div class="admin-center">
+          <h2 style="font-size:24px;font-weight:800;margin-bottom:20px">Store Management</h2>
+          <div class="stores-table">
+            <div class="table-header">
+              <h3>All Stores</h3>
+              <button class="btn btn-ghost" style="padding:8px 14px;font-size:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg> Filter Results</button>
+            </div>
+            <table>
+              <thead><tr><th>Store ID</th><th>Chain Name</th><th>Location</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="stores-full-tbody">
+                <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div class="tab-section" id="tab-users">
+      <div class="admin-content">
+        <div class="admin-center">
+          <h2 style="font-size:24px;font-weight:800;margin-bottom:20px">User Management</h2>
+          <div class="stores-table">
+            <div class="table-header">
+              <h3>All Users</h3>
+              <button class="btn btn-ghost" style="padding:8px 14px;font-size:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg> Filter Results</button>
+            </div>
+            <table>
+              <thead><tr><th>User ID</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-section" id="tab-settings">
+      <div class="admin-content">
+        <div class="admin-center">
+          <h2 style="font-size:24px;font-weight:800;margin-bottom:20px">System Settings</h2>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px">
+            <h3 style="font-size:16px;font-weight:800;margin-bottom:20px">Platform Configuration</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+              <div>
+                <label style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:8px">API Timeout (seconds)</label>
+                <input type="number" value="30" style="width:100%;padding:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body)">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:8px">Cache TTL (seconds)</label>
+                <input type="number" value="120" style="width:100%;padding:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body)">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:8px">Max Stores Per Page</label>
+                <input type="number" value="50" style="width:100%;padding:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body)">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:8px">Maintenance Mode</label>
+                <select style="width:100%;padding:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-body)">
+                  <option>Disabled</option>
+                  <option>Enabled</option>
+                </select>
+              </div>
+            </div>
+            <button class="auth-btn" style="margin-top:20px;width:200px;padding:12px">Save Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -234,33 +337,282 @@ tr:hover td{background:rgba(255,255,255,0.01)}
 <script>
 async function loadAdmin() {
   try {
-    const s = await Backend.getPlatformStats();
+    const res = await Backend.getPlatformStats();
+    const s = res.data || res;
     document.getElementById('k-stores').textContent = s.activeStores.toLocaleString();
     document.getElementById('k-stores-t').textContent = '↑ 8.4% vs last month';
     document.getElementById('k-users').textContent = (s.users/1000000).toFixed(1) + 'M';
     document.getElementById('k-users-t').textContent = '↑ 12% — Active now: 42k';
     document.getElementById('k-api').textContent = s.apiHealth + '%';
     document.getElementById('k-vol').textContent = '$' + (s.volume/1000000).toFixed(1) + 'M';
-  } catch(e) {}
-  // Static store table
-  const stores = [
-    { id:'#KX-9920', name:'Lumina Lifestyle', loc:'London, UK', sync:'2m ago', status:'active' },
-    { id:'#KX-8122', name:'Vertex Market', loc:'New York, US', sync:'14m ago', status:'active' },
-    { id:'#KX-7701', name:'Atlas Provisions', loc:'Berlin, DE', sync:'Offline', status:'inactive' },
-  ];
-  document.getElementById('stores-tbody').innerHTML = stores.map(s => `<tr>
-    <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">${s.id}</td>
-    <td><span class="store-name">${s.name}</span></td>
-    <td style="font-size:12px;color:var(--text-muted)">${s.loc}</td>
-    <td style="font-size:12px;color:var(--text-muted)">${s.sync}</td>
-    <td><span class="status-pill ${s.status==='active'?'pill-green':'pill-gray'}">${s.status.toUpperCase()}</span></td>
-    <td><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px">View</button></td>
-  </tr>`).join('');
+  } catch(e) {
+    console.error('❌ loadAdmin error:', e);
+    Toast.error('Failed to load platform stats: ' + e.message);
+  }
+  // Load real stores from backend
+  await loadAdminStores();
 }
+
+async function loadAdminStores() {
+  try {
+    const res = await Backend.getAdminStores('?limit=10&page=1');
+    const stores = res.data || [];
+    const tbody = document.getElementById('stores-tbody');
+    if (!tbody) return;
+    if (!stores.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:32px">No stores found</td></tr>';
+      return;
+    }
+    tbody.innerHTML = stores.map(s => `<tr class="store-clickable" onclick="showStoreDetail('${s._id}')">
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">#${s._id ? s._id.substring(0,6).toUpperCase() : s.id || '-'}</td>
+      <td><span class="store-name">${s.name || '-'}</span></td>
+      <td style="font-size:12px;color:var(--text-muted)">${s.address?.city || '-'}, ${s.address?.country || '-'}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${s.lastPosSyncAt ? new Date(s.lastPosSyncAt).toLocaleTimeString() : 'Never'}</td>
+      <td><span class="status-pill ${s.status==='active'?'pill-green':'pill-gray'}">${(s.status || 'unknown').toUpperCase()}</span></td>
+      <td onclick="event.stopPropagation()">${s.status === 'pending_approval' ? `<button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;background:rgba(163,255,18,0.1);color:var(--acid)" onclick="adminApprove('${s._id}', this)">Approve</button>` : `<button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;background:rgba(255,77,77,0.06);color:var(--red)" onclick="adminSuspend('${s._id}', this)">Suspend</button>`}</td>
+    </tr>`).join('');
+  } catch(e) {
+    console.error('loadAdminStores:', e);
+    const tbody = document.getElementById('stores-tbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red);padding:32px">Failed to load stores</td></tr>';
+  }
+}
+
+async function adminApprove(storeId, btn) {
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = '...';
+  try {
+    await Backend.approveStore(storeId);
+    Toast.success('Store approved!');
+    await loadAdminStores();
+  } catch(e) {
+    btn.disabled = false; btn.textContent = orig;
+    Toast.error(e.message || 'Approval failed');
+  }
+}
+
+async function adminSuspend(storeId, btn) {
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = '...';
+  try {
+    await Backend.suspendStore(storeId);
+    Toast.success('Store suspended');
+    await loadAdminStores();
+  } catch(e) {
+    btn.disabled = false; btn.textContent = orig;
+    Toast.error(e.message || 'Suspension failed');
+  }
+}
+// ── Store Detail Modal ────────────────────────────────────
+async function showStoreDetail(storeId) {
+  try {
+    console.log('📦 Fetching store details for:', storeId);
+    const res = await Backend.getStoreDetail(storeId);
+    console.log('📦 Store response:', res);
+    const store = res.data || res;
+    console.log('📦 Store data:', store);
+
+    const html = `
+      <div class="detail-section">
+        <div class="detail-grid">
+          <div>
+            <div class="detail-label">Store Name</div>
+            <div class="detail-value">${store.name || '-'}</div>
+          </div>
+          <div>
+            <div class="detail-label">Status</div>
+            <div class="detail-value"><span class="status-pill ${store.status==='active'?'pill-green':'pill-gray'}">${(store.status || 'unknown').toUpperCase()}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-label">Location</div>
+        <div class="detail-value">${store.address?.street || '-'}, ${store.address?.city || '-'}, ${store.address?.country || '-'}</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-grid">
+          <div>
+            <div class="detail-label">Email</div>
+            <div class="detail-value">${store.email || '-'}</div>
+          </div>
+          <div>
+            <div class="detail-label">Phone</div>
+            <div class="detail-value">${store.phone || '-'}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-grid">
+          <div>
+            <div class="detail-label">Currency</div>
+            <div class="detail-value">${store.currency || 'USD'}</div>
+          </div>
+          <div>
+            <div class="detail-label">VAT Rate</div>
+            <div class="detail-value">${store.vatRate || '0'}%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-grid">
+          <div>
+            <div class="detail-label">Total Orders</div>
+            <div class="detail-value">${store.totalOrders || 0}</div>
+          </div>
+          <div>
+            <div class="detail-label">Total Revenue</div>
+            <div class="detail-value">$${(store.totalRevenue || 0).toLocaleString()}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-label">POS Connector</div>
+        <div class="detail-value">${(store.posConnector || 'none').toUpperCase()}</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-label">Created</div>
+        <div class="detail-value">${store.createdAt ? new Date(store.createdAt).toLocaleString() : '-'}</div>
+      </div>
+
+      <div class="detail-actions">
+        ${store.status === 'pending_approval' ? `<button class="detail-actions btn-approve" onclick="event.stopPropagation(); adminApproveDetail('${storeId}', this)">Approve Store</button>` : ''}
+        ${store.status === 'active' ? `<button class="detail-actions btn-suspend" onclick="event.stopPropagation(); adminSuspendDetail('${storeId}', this)">Suspend Store</button>` : ''}
+        <button class="detail-actions" style="background:rgba(255,255,255,0.05);color:var(--text-muted);border:1px solid var(--border)" onclick="closeStoreDetail()">Close</button>
+      </div>
+    `;
+
+    document.getElementById('store-detail-content').innerHTML = html;
+    document.getElementById('store-detail-modal').classList.add('show');
+  } catch(e) {
+    Toast.error(e.message || 'Failed to load store details');
+  }
+}
+
+function closeStoreDetail() {
+  document.getElementById('store-detail-modal').classList.remove('show');
+}
+
+async function adminApproveDetail(storeId, btn) {
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = '...';
+  try {
+    await Backend.approveStore(storeId);
+    Toast.success('Store approved!');
+    closeStoreDetail();
+    await loadAdminStores();
+  } catch(e) {
+    btn.disabled = false; btn.textContent = orig;
+    Toast.error(e.message || 'Approval failed');
+  }
+}
+
+async function adminSuspendDetail(storeId, btn) {
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = '...';
+  try {
+    await Backend.suspendStore(storeId);
+    Toast.success('Store suspended');
+    closeStoreDetail();
+    await loadAdminStores();
+  } catch(e) {
+    btn.disabled = false; btn.textContent = orig;
+    Toast.error(e.message || 'Suspension failed');
+  }
+}
+
+// ── Tab Navigation ──────────────────────────────────────
+function switchTab(tabName, navItem) {
+  // Hide all tabs
+  document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  // Show selected tab
+  const tabEl = document.getElementById(`tab-${tabName}`);
+  if (tabEl) {
+    tabEl.classList.add('active');
+    navItem?.classList.add('active');
+  }
+
+  // Load data for tab
+  if (tabName === 'stores') {
+    loadAllStores();
+  } else if (tabName === 'users') {
+    loadAllUsers();
+  }
+}
+
+async function loadAllStores() {
+  try {
+    const res = await Backend.getAdminStores('?limit=100&page=1');
+    const stores = res.data || [];
+    const tbody = document.getElementById('stores-full-tbody');
+    if (!tbody) return;
+
+    if (!stores.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px">No stores found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = stores.map(s => `<tr>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">#${s._id ? s._id.substring(0,6).toUpperCase() : s.id || '-'}</td>
+      <td>${s.name || '-'}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${s.address?.city || '-'}, ${s.address?.country || '-'}</td>
+      <td><span class="status-pill ${s.status==='active'?'pill-green':'pill-gray'}">${(s.status || 'unknown').toUpperCase()}</span></td>
+      <td onclick="event.stopPropagation()">${s.status === 'pending_approval' ? `<button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;background:rgba(163,255,18,0.1);color:var(--acid)" onclick="adminApprove('${s._id}', this)">Approve</button>` : `<button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;background:rgba(255,77,77,0.06);color:var(--red)" onclick="adminSuspend('${s._id}', this)">Suspend</button>`}</td>
+    </tr>`).join('');
+  } catch(e) {
+    console.error('❌ loadAllStores error:', e);
+    Toast.error('Failed to load stores: ' + e.message);
+  }
+}
+
+async function loadAllUsers() {
+  try {
+    const res = await Backend.getAllUsers();
+    const users = res.data || [];
+    const tbody = document.getElementById('users-tbody');
+    if (!tbody) return;
+
+    if (!users.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:32px">No users found</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => `<tr>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">#${u._id ? u._id.substring(0,6).toUpperCase() : u.id || '-'}</td>
+      <td>${u.email || '-'}</td>
+      <td><span style="padding:4px 8px;border-radius:4px;background:rgba(163,255,18,0.1);color:var(--acid);font-size:10px;font-weight:700;text-transform:uppercase">${(u.role || 'customer').toUpperCase()}</span></td>
+      <td>${u.isActive !== false ? '<span style="color:var(--acid)">● Active</span>' : '<span style="color:var(--text-muted)">● Inactive</span>'}</td>
+      <td><button class="btn btn-ghost" style="padding:6px 12px;font-size:11px;background:rgba(255,77,77,0.06);color:var(--red)">Deactivate</button></td>
+    </tr>`).join('');
+  } catch(e) {
+    console.error('❌ loadAllUsers error:', e);
+    Toast.error('Failed to load users: ' + e.message);
+  }
+}
+
 // Animate bars
 document.querySelectorAll('.bar').forEach((b,i) => { b.style.height = '0'; setTimeout(() => b.style.height = b.style.height || (Math.random()*60+20)+'%', i*80+200); });
 document.querySelectorAll('.toggle').forEach(t => t.addEventListener('click', () => t.classList.toggle('off')));
+// Close modal on backdrop click
+document.getElementById('store-detail-modal')?.addEventListener('click', (e) => { if(e.target.id === 'store-detail-modal') closeStoreDetail(); });
+
+// Initialize
 loadAdmin();
 </script>
+
+<!-- Store Detail Modal -->
+<div class="store-detail-modal" id="store-detail-modal" onclick="if(event.target===this)closeStoreDetail()">
+  <div class="store-detail-card">
+    <div class="store-detail-header">
+      <h2 id="store-detail-title">Store Details</h2>
+      <button class="close-btn" onclick="closeStoreDetail()">✕</button>
+    </div>
+    <div id="store-detail-content"></div>
+  </div>
+</div>
+
 </body>
 </html>
