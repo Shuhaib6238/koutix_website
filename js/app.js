@@ -5,7 +5,7 @@
 // ── CONFIG ──────────────────────────────────────────────
 const KOUTIX_CONFIG = {
   // Local Backend API base (Port 5000 as per server.js)
-  apiBase: 'https://koutix-backend-1.onrender.com',
+  apiBase: 'https://koutix-backend-1.onrender.com/api',
   // Firebase Web SDK Config (Update with your real API Key)
   firebase: {
   apiKey: "AIzaSyAThZnQ4mOykeLsSkFuwG-zXVMwfei0AM4",
